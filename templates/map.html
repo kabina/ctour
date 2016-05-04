@@ -81,7 +81,7 @@
     		$( "#accordion" )
       		.accordion({
         		header: "> div > h3",
-				collapsible: true
+				collapsible: false
       		})
       		.sortable({
         		handle: "h3",
@@ -103,7 +103,7 @@
     		$( accr ).each(function() {
       			$(this).accordion({
        				header: "> div > h4",
-					collapsible: true
+					collapsible: false
       			})
       			.sortable({
        				handle: "h4",
@@ -248,57 +248,6 @@
   		}
 	}
 	
-/*
-  $(function() {
-    $( "#accordionsub" )
-      .accordion({
-        header: "> div > h4",
-		collapsible: true
-      })
-      .sortable({
-        handle: "h4",
-        stop: function( event, ui ) {
-          // IE doesn't register the blur when sorting
-          // so trigger focusout handlers to remove .ui-state-focus
-          ui.item.children( "h4" ).triggerHandler( "focusout" );
- 
-          // Refresh accordion to handle new order
-          $( this ).accordion( "refresh" );
-        }
-      });
-	$("h3").click(function() {
-		_preview(this.textContent);
-	});
-	$("h4").click(function() {
-		searchDetail(this.id);
-	});
-	$(".group").mousedown(function() {
-		if(event.which == 3) {
-			if(confirm('삭제하시겠습니까?'))
-				this.remove();
-				_saveSession();
-		}
-	});
-
-    $( "#accordion" )
-      .accordion({
-        header: "> div > h3",
-		collapsible: true
-      })
-      .sortable({
-        handle: "h3",
-        stop: function( event, ui ) {
-          // IE doesn't register the blur when sorting
-          // so trigger focusout handlers to remove .ui-state-focus
-          ui.item.children( "h3" ).triggerHandler( "focusout" );
- 
-          // Refresh accordion to handle new order
-          $( this ).accordion( "refresh" );
-		  _saveSession();
-        }
-      });
-  });
-*/
 	function _saveSession() {
 
 		idx = 1;
@@ -675,14 +624,18 @@
 		select = $(".accordionsub").eq(cmenu);
 
 		select.append("<div class=\"groupsub\"><h4 id='"+pid+"' title='' data-addr='"+place_addr+"'>"+title+"</h4><div><label>주소</label><input type=text size=15 value='"+place_addr+"' readonly><label>메모</label><input type=text class=memo name=memo size=15 value=''><br><label>비용</label><input type=text class=cost name=cost size=5 value=''/><br><label>동선제외</label><input type=checkbox class=routeyn name=routeyn/><br><label>다음장소</label><input type=text size=15 class=routeinfo name=routeinfo readonly value=''/><br><center><button name=deleteplace class=deleteplace onclick='javascript:_deleteplace(this)' value='장소삭제'>장소삭제</button></      center></div></div>");
-		select = $(".accordionsub").eq(cmenu);
-		refresharc();
-		refresharcsub(cmenu);
+		$(select).find("h4").unbind("click").bind("click",function() {
+			searchByPlaceId(this.id);
+		});
 		$(select).sortable().accordion("refresh");
+		refresharcsub();
+		refresharc();
 		$("#accordion").sortable().accordion("refresh");
+/*
 		$("h4").bind("click",function() {
 			searchByPlaceId(this.id);
 		});
+*/
 
 
 	}
@@ -759,7 +712,7 @@
       		travelMode: google.maps.TravelMode[selectedMode]
   		};
   		directionsService.route(request, function(response, status) {
-			routesteps
+			routesteps = [];
 			var legs = response.routes[0].legs;
 			for(index = 0; index < legs.length ; index ++ ) {
 				routesteps.push({
@@ -772,26 +725,19 @@
 			index = 0;
 			stepindex = 0;
 			distance_total = 0;
-			console.log(routeyn);
-			console.log(routesteps);
 			$(".accordionsub").eq(cmenu).find(".groupsub > div > .routeinfo").each(function () {
-				console.log(index);
-				console.log(stepindex);
 				if(routeyn.includes(index)) {
 					index ++;
 					this.value = "";
 					return true;
 				}else {
-					console.log("============");
-					console.log(stepindex);
-					console.log("============");
-					console.log(stepindex);
 					this.value = "";
 					if((stepindex) >= routesteps.length) {
-						return false;
+						return true;
+					}else{
+						this.value = routesteps[stepindex].distance+", "+routesteps[stepindex].duration;
+						distance_total += parseInt(routesteps[stepindex].distance);
 					}
-					this.value = routesteps[stepindex].distance+", "+routesteps[stepindex].duration;
-					distance_total += parseInt(routesteps[stepindex].distance);
 					stepindex ++;
 					index ++;
 				}
