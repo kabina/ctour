@@ -1,0 +1,121 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="web design, website development, web application development, print design, database development, ecommerce websites, search engine optimization, packaging design" />
+<meta name="description" content="Design Chemical, Bangkok provides web design, website development, web application development, print design, database development, ecommerce websites, search engine optimization &amp; packaging design." />
+<meta name="robots" content="all" />
+<title>jQuery Example - Vertical Accordion Menu using Cookies - Design Chemical Bangkok</title>
+<link rel="shortcut icon" href="http://www.designchemical.com/favicon.ico" />
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<style>
+ul{list-style: none; padding: 0; margin: 0;}
+#nav {float: left; width: 280px; border-top: 1px solid #999; border-right: 1px solid #999; border-left: 1px solid #999; margin: 15px 0;}
+#nav li a {display: block; padding: 10px 15px; background: #ccc; border-top: 1px solid #eee; border-bottom: 1px solid #999; text-decoration: none; color: #000;}
+#nav li a:hover, #nav li a.active {background: #999; color: #fff;}
+#nav li ul {display: none;}
+#nav li ul li a {padding: 10px 25px; background: #ececec; border-bottom: 1px dotted #ccc;}
+#draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
+</style>
+<script>
+ 	var cmenu = -1;
+$(document).ready(function () {
+  var checkCookie = $.cookie("nav-item");
+
+
+  if (checkCookie != "") {
+	$('#nav > li > a:eq('+checkCookie+')').addClass('active').next().show();
+  }
+  $("#draggable").draggable();
+  $(".topmenu").each(function() {
+	  (this).droppable({
+	    drop: function( event, ui ) {
+        $( this )
+          .addClass( "ui-state-highlight" )
+          .find( "p" )
+            .html( "Dropped!" );
+        }
+  	  });
+   });
+  $('#nav > li > a').click(function(){
+      var navIndex = $('#nav > li > a').index(this);
+	  alert(navIndex);
+	  $.cookie("nav-item", navIndex);
+	  $('#nav li ul').slideUp();
+	   if ($(this).next().is(":visible")){
+		   $(this).next().slideUp();
+			cmenu = -1;
+	   } else {
+	   $(this).next().slideToggle();
+			cmenu = navIndex;
+	   }
+	   $('#nav li a').removeClass('active');
+	   $(this).addClass('active');
+	});
+	$('#nav > li > ul > li > a').click(function(){
+		var navIndex = $('#nav > li > ul > li > a').index(this);
+		console.log($('#nav > li > ul > li > a'));
+	  alert(navIndex);
+	   if ($(this).next().is(":visible")){
+		   $(this).next().slideUp();
+	   } else {
+	   $(this).next().slideToggle();
+	   }
+	   $('#nav li a ul li').removeClass('active');
+	   $(this).addClass('active');
+	});
+});
+	function additem() {
+		if(cmenu<0) alert("no available menu");
+		else {
+			topmenu = "#ul"+cmenu;
+			$(topmenu).append("<li><a href=\"#\">test</a></li>");	
+		}
+	}
+</script>
+
+</head>
+<body id="demo">
+	    <h2 class="page-title">jQuery Demo: Vertical Accordion Menu using jQuery Cookies</h2>
+		
+		  <ul id="nav">
+	    <li><a href="#">Item 1</a>
+		  <ul class="topmenu" id="ul0">
+		    <li><a href="#">Sub-Item 1 a</a></li>
+			<li><a href="#">Sub-Item 1 b</a></li>
+			<li><a href="#">Sub-Item 1 c</a></li>
+		  </ul>
+		</li>
+		<li><a href="#">Item 2</a>
+		  <ul class="topmenu" id="ul1">
+		    <li><a href="#">Sub-Item 2 a</a></li>
+			<li><a href="#">Sub-Item 2 b</a></li>
+		  </ul>
+		</li>
+		<li><a href="#">Item 3</a>
+		  <ul class="topmenu" id="ul2">
+		    <li><a href="#">Sub-Item 3 a</a></li>
+			<li><a href="#">Sub-Item 3 b</a></li>
+			<li><a href="#">Sub-Item 3 c</a></li>
+			<li><a href="#">Sub-Item 3 d</a></li>
+		  </ul>
+		</li>
+		<li><a href="#">Item 4</a>
+		  <ul class="topmenu" id="ul3">
+		    <li><a href="#">Sub-Item 4 a</a></li>
+			<li><a href="#">Sub-Item 4 b</a></li>
+			<li><a href="#">Sub-Item 4 c</a></li>
+		  </ul>
+		</li>
+	  </ul>
+		  <p style="clear: both;"><a href="http://www.designchemical.com/blog/index.php/jquery/jquery-simple-vertical-accordion-menu-with-cookies/">Back to blog post</a></p>
+	<a href="javascript:additem()">additem</a>
+	<!-- <input type=button id="draggable" name="test" value="test" > -->
+	<div id="draggable">draggable</div>
+</body>
+</html>

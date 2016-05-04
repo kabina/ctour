@@ -1,0 +1,137 @@
+Traceback (most recent call last):
+  File "test.py", line 9, in <module>
+    app.run(host='192.168.0.144', port=80, debug=True)
+  File "/usr/local/lib/python2.7/dist-packages/flask/app.py", line 772, in run
+    run_simple(host, port, self, **options)
+  File "/usr/local/lib/python2.7/dist-packages/werkzeug/serving.py", line 677, in run_simple
+    s.bind((hostname, port))
+  File "/usr/lib/python2.7/socket.py", line 224, in meth
+    return getattr(self._sock,name)(*args)
+socket.error: [Errno 98] Address already in use
+ * Running on http://192.168.0.144:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger pin code: 122-385-655
+164.124.106.147 - - [03/May/2016 08:09:40] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 08:09:40] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 08:09:40] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 08:09:40] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 08:09:40] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 08:09:40] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 08:09:40] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 08:09:40] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 08:09:40] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:34:05] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:34:05] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:34:05] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:34:05] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:34:05] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:34:05] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:34:05] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:34:05] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:34:05] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:36:32] "GET /static/css/images/ui-bg_glass_65_ffffff_1x400.png HTTP/1.1" 404 -
+164.124.106.147 - - [03/May/2016 09:36:44] "GET /static/css/images/ui-bg_glass_75_dadada_1x400.png HTTP/1.1" 404 -
+164.124.106.147 - - [03/May/2016 09:40:53] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:40:53] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:40:53] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:40:53] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:40:53] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:40:53] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:40:53] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:40:53] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:40:53] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:41:02] "GET /static/css/images/ui-bg_glass_65_ffffff_1x400.png HTTP/1.1" 404 -
+164.124.106.147 - - [03/May/2016 09:41:15] "GET /static/css/images/ui-bg_glass_75_dadada_1x400.png HTTP/1.1" 404 -
+164.124.106.147 - - [03/May/2016 09:41:56] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:41:56] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:41:56] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:41:56] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:41:56] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:41:56] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:41:56] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:41:56] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:41:56] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:42:07] "GET /static/css/images/ui-bg_glass_65_ffffff_1x400.png HTTP/1.1" 404 -
+164.124.106.147 - - [03/May/2016 09:42:24] "GET /static/css/images/ui-bg_glass_75_dadada_1x400.png HTTP/1.1" 404 -
+164.124.106.147 - - [03/May/2016 09:43:44] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:43:44] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:43:44] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:43:44] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:43:44] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:43:44] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:43:44] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:43:44] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:43:44] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:45:23] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:45:23] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:45:23] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:45:23] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:45:23] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:45:23] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:45:23] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:45:23] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:45:23] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:46:41] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:46:41] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:46:41] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:46:41] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:46:41] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:46:41] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:46:41] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:46:41] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:46:41] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:47:45] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:47:45] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:47:45] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:47:45] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:47:45] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:47:45] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:47:45] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:47:45] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:47:45] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:51:13] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:51:14] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:51:14] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:51:14] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:51:14] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:51:14] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:51:14] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:51:14] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:51:14] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:53:32] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:53:32] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:53:32] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:53:32] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:53:32] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:53:32] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:53:32] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:53:32] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:53:32] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:56:26] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:56:26] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:56:26] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:56:26] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:56:26] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:56:26] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:56:26] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:56:26] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:56:26] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:57:43] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 09:57:43] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:57:43] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:57:43] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:57:43] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:57:43] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:57:43] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:57:43] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 09:57:43] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 10:01:24] "GET /login?email=nheo.an@gmail.com&name=ChangSun%20An&pic=https://lh4.googleusercontent.com/-IeLaqNNCS8U/AAAAAAAAAAI/AAAAAAAAE_A/FpKXR51ZCYM/photo.jpg?sz=50 HTTP/1.1" 200 -
+164.124.106.147 - - [03/May/2016 10:01:24] "GET /static/css/nheo.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 10:01:24] "GET /static/css/style.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 10:01:24] "GET /static/js/jquery-1.12.1.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 10:01:24] "GET /static/js/jquery-sortable.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 10:01:24] "GET /static/js/jquery-ui.min.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 10:01:24] "GET /static/css/jquery-ui.css HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 10:01:24] "GET /static/js/nheo.js HTTP/1.1" 304 -
+164.124.106.147 - - [03/May/2016 10:01:24] "GET /static/js/jquery-ui.js HTTP/1.1" 304 -
