@@ -1,8 +1,12 @@
 $(document).ready(function() {
 	_saveSession();
+<<<<<<< HEAD
 	refresharc();
 	refresharcsub();
 	//_loadTourSession();
+=======
+	_loadTourSession();
+>>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 });
 $(function(){
 	$('#btnnheo').click(function(){
@@ -32,8 +36,13 @@ $(function(){
 			type: 'POST',
 			success: function(response){
 				ctour = response["ctour"];
+<<<<<<< HEAD
 				console.log(response);
 				_loadTourDetail(ctour["ctour_master"][0], ctour["ctour_wpt"], ctour["ctour_place"])
+=======
+				console.log(ctour["ctour_master"]);
+				_loadTourDetail(ctour["ctour_master"][0], ctour["ctour_wpt"])
+>>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 				//procMapControl(response);
 			},
 			error: function(error){
@@ -76,6 +85,7 @@ $(function(){
 */
 
 	$('#wptbtn').click(function() {
+<<<<<<< HEAD
 		wptcnt++;
 		var toAdd = "<div class=\"group\"><h3 title='"+$("input[name=wptnm]").val()+"' id='0' data-addr='"+$("input[name=wptnm]").val()+"''>0일 "+$("input[name=wptnm]").val()+"</h3><div style='height:100px;' class=accordionsub><table><tr><td>체류:<input type=text id=wp_nights value='0' size=2 onchange=\"javascript:_changenights("+(wptcnt)+")\">박</td><td>"+ 
 " 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
@@ -100,6 +110,19 @@ $(function(){
 			console.log(cmenu);
 			console.log("=======================");
 			_preview(this.getAttribute("title"));
+=======
+		var toAdd = "<div class=\"group\"><h3>"+$("input[name=wptnm]").val()+"</h3><div></div></div>";
+		$("#accordion").append(toAdd);
+		$("#accordion").sortable().accordion("refresh");
+		$(".group").mousedown(function() {
+			if(event.which == 3) {
+				if(confirm('삭제하시겠습니까?'))
+					this.remove();
+			}
+		});
+		$("h3").click(function() {
+			_preview(this.textContent);
+>>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 		});
 		//console.log($("#accordion"));
 	});

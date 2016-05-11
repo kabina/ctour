@@ -32,10 +32,19 @@ def home():
 
 @app.route('/gettourinfo', methods=['POST','GET'])
 def gettourinfo():
+<<<<<<< HEAD
 	try:
 		#conn = mdb.connect('localhost', 'kabina', 'ah64jj3!', 'CTOUR')
 		conn = mdb.connect(user='kabina', password='ah64jj3!', host='127.0.0.1', database='CTOUR')
 		#conn = mdb.connect(user='kabina', passwd='ah64jj3!', port=3306, host='127.0.0.1', db='CTOUR')
+=======
+	global conn
+	try:
+		#conn = mdb.connect('localhost', 'kabina', 'ah64jj3!', 'CTOUR')
+		print "It's Test"
+		conn = mdb.connect(user='kabina', password='ah64jj3!', host='127.0.0.1', database='CTOUR')
+		#conn = mdb.connect(user='root', passwd='ah64jj3!', port=3306, host='127.0.0.1', db='CTOUR')
+>>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 
 		# read the posted values from the UI
 		uid = session.get("id")
@@ -74,9 +83,15 @@ def gettourinfo():
 
 	except Exception as e:
 		return json.dumps({'error':str(e)})
+<<<<<<< HEAD
 	finally:
 		if conn:
 			conn.close()
+=======
+	#finally:
+		##if conn:
+		#conn.close()
+>>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 	
 
 
@@ -110,9 +125,15 @@ def tour():
 
 	except Exception as e:
 		return json.dumps({'error':str(e)})
+<<<<<<< HEAD
 	finally:
 		if conn:
 			conn.close()
+=======
+	#finally:
+	#if conn:
+	#	conn.close()
+>>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 	
 	return render_template('map.html', ctour_list=ctour_list)
 
@@ -214,4 +235,8 @@ if __name__ == '__main__':
 	app.config['SESSION_TYPE'] = 'memcached'
 	app.config['SECRET_KEY'] = 'super secret key'
 	app.debug=True
+<<<<<<< HEAD
 	app.run(host='192.168.0.142')
+=======
+	app.run(host='192.168.0.144', port=5000)
+>>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
