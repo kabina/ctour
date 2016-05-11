@@ -35,15 +35,16 @@
 
 	var directionsDisplay;
 	var directionsService = new google.maps.DirectionsService();
-	var src
-	var dest
-	var marker
+	var src;
+	var dest;
+	var marker;
 	var nearMarkerMap = new Map();
 	var bounds = new google.maps.LatLngBounds();
 	var wptarr = [];
 	var wptcnt = 0;
  	var cmenu = 0;
-	var objplace
+	var objplace;
+	var map;
 	var routesteps = [];
 
 	var placeSearch, autocomplete, autocomplete2;
@@ -81,7 +82,7 @@
     		$( "#accordion" )
       		.accordion({
         		header: "> div > h3",
-				collapsible: false
+				collapsible: true
       		})
       		.sortable({
         		handle: "h3",
@@ -135,10 +136,11 @@
 				}
 			});
 			$("h3").unbind("click").bind("click",function() {
-      			cmenu = $('h3').index(this);
-				console.log("=======================");
-				console.log(cmenu);
-				console.log("=======================");
+			alert("CMENU:"+cmenu);
+      				//cmenu = $('h3').index(this);
+				//console.log("=======================");
+				//console.log(cmenu);
+				//console.log("=======================");
 				_preview(this.title);
 			});
 			$("h4").unbind("click").bind("click",function() {
@@ -181,22 +183,17 @@
 		}
 	}
 	
-	function initAutocomplete() {
+	function initAutocomplete(searchtype) {
   		// Create the autocomplete object, restricting the search to geographical
   		// location types.
   		autocomplete = new google.maps.places.Autocomplete(
       		/** @type {!HTMLInputElement} */(document.getElementById('address_start')),
-<<<<<<< HEAD
-      	{types: ['establishment']});
+      	{types: [searchtype]});
 		autocomplete.bindTo('bounds', map);
-=======
-      	{types: ['geocode']});
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 		
   		// When the user selects an address from the dropdown, populate the address
   		// fields in the form.
   		//autocomplete.addListener('place_changed');
-<<<<<<< HEAD
   		//autocomplete.addListener('place_changed', fillInAddress());
   		autocomplete.addListener('place_changed', function() {
 			var place = autocomplete.getPlace();
@@ -215,9 +212,6 @@
     			}
 			searchByPlaceId(place.place_id);
 		});
-=======
-  		autocomplete.addListener('place_changed', fillInAddress());
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 
   		autocomplete2 = new google.maps.places.Autocomplete(
       		/** @type {!HTMLInputElement} */(document.getElementById('address_end')),
@@ -234,7 +228,6 @@
 		// [START region_fillform]
 	function fillInAddress() {
   		// Get the place details from the autocomplete object.
-<<<<<<< HEAD
 		
 		var place = autocomplete.getPlace();
 		console.log(place);
@@ -253,11 +246,6 @@
 		console.log("=================search place ===============");
 		searchByPlaceId(place.place_id);
 /*
-=======
-  		var place = autocomplete.getPlace();
-/*
-		
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
   		for (var component in componentForm) {
     		document.getElementById(component).value = '';
     		document.getElementById(component).disabled = false;
@@ -280,10 +268,9 @@
 	// Bias the autocomplete object to the user's geographical location,
 	// as supplied by the browser's 'navigator.geolocation' object.
 	function geolocate(component) {
-<<<<<<< HEAD
+		if(map.getZoom()<10) initAutocomplete("geocode");
+		else initAutocomplete("establishment");
 /*
-=======
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
   		if (navigator.geolocation) {
     		navigator.geolocation.getCurrentPosition(function(position) {
       		var geolocation = {
@@ -297,10 +284,7 @@
       		component.setBounds(circle.getBounds());
     		});
   		}
-<<<<<<< HEAD
 */
-=======
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 	}
 	
 	function _saveSession() {
@@ -346,7 +330,6 @@
 	}
 	function _changenights(idx) {
 		select = ".accordionsub";
-<<<<<<< HEAD
 		//nights = $(select).eq(cmenu).find(".wp_nights").val();
 		nights = document.getElementsByName("wp_nights");
 		// nights = document.getElementById("wp_nights"+idx).value;
@@ -354,14 +337,6 @@
 		//$("h3")[idx].attr("id",nights);
 		//$("h3")[idx].id = nights;
 		$("h3")[idx].textContent = nights[idx].value+"일 "+$("h3")[idx].title;
-=======
-		$(select).eq(cmenu).find("#wp_nights").val();
-		// nights = document.getElementById("wp_nights"+idx).value;
-		console.log(nights);
-		//$("h3")[idx].attr("id",nights);
-		$("h3")[idx].id = nights;
-		$("h3")[idx].textContent = nights+"일 "+$("h3")[idx].title;
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 
 		//document.getElementById("ctour_days").value = document.getElementById("ctour_days").value 
 		//alert(title);
@@ -371,11 +346,7 @@
 
 		total_nights = 0;
 		for(idx = 0; idx < wptcnt; idx++) {
-<<<<<<< HEAD
 			total_nights += parseInt(nights[idx].value);
-=======
-			total_nights += parseInt($("h3")[idx].id);
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 		}
 		document.getElementById("ctour_days").value = total_nights;
 	}
@@ -398,7 +369,7 @@
 			initwaypoints();
 		}
 		var totalnights = 0;
-		console.log(ctour_wpt);
+		//console.log(ctour_wpt);
 		for(idx = 0; idx < wptcnt; idx ++ ) {
 			waypts = ctour_wpt[idx][2];
 			nights = ctour_wpt[idx][3];
@@ -407,11 +378,7 @@
 			cost = ctour_wpt[idx][6];
 			distance = ctour_wpt[idx][7];
 			totalnights += nights;
-<<<<<<< HEAD
 			var toAdd = "<div class='group' ><h3 title='"+waypts+"' id="+nights+" data-addr=\""+addr+"\"> "+nights+"일 "+waypts+"</h3><div style='width:200px;' class='accordionsub' ><table ><tr><td>체류:<input type=text name=wp_nights class=wp_nights value="+nights+" size=2 onchange=\"javascript:_changenights("+(idx)+")\"> 박 </td><td>"+
-=======
-			var toAdd = "<div class='group' ><h3 title='"+waypts+"' id="+nights+" data-addr=\""+addr+"\"> "+nights+"일 "+waypts+"</h3><div style='width:200px;' class='accordionsub' ><table ><tr><td>체류:<input type=text id=wp_nights value="+nights+" size=2 onchange=\"javascript:_changenights("+(idx)+")\"> 박 </td><td>"+
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 " 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
 " <input type=button id="+idx+" class=stroll name=innerroute value='동선' onclick='javascript:stroll(this)'></td></tr><tr><td colspan=2>거리:<input type=text class=wp_distance name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type=text  id=wp_note name=wp_note value='"+note+"' size=20 ></td></tr><tr><td colspan=2>비용:<input type=text id=wp_cost name=wp_cost size=10 value=''/></td></tr></table></div></div>";  
 			$("#accordion").append(toAdd);
@@ -438,11 +405,7 @@
 			ictour_place_routeinfo = ctour_place[idx][9];
 
 		//select = ".accordionsub";
-<<<<<<< HEAD
 		//$(select).eq(cmenu).find(".wp_nights").val();
-=======
-		//$(select).eq(cmenu).find("#wp_nights").val();
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 
 			select = $(".accordionsub:eq("+(parseInt(ictour_wpt)-1)+")");
 
@@ -454,12 +417,12 @@
 			});
 		}
 
+		refreshitem();
 		refresharc();
 		refresharcsub();
 		  //$(".accordionsub").eq(0).sortable().accordion("refresh"); // accordion sub에 실제 영향
 		//refresharc();
 		$("#accordion").sortable().accordion("refresh");
-		//refreshh4();
 		//$(".accordionsub").sortable().accordion("refresh");
 
 		_initDroppable();
@@ -476,6 +439,7 @@
 
 		$("h3").each(function() {
       		cmenu = $('.group').index(this);
+			alert("CMENU:"+cmenu);
 		
 			dataarr.push({
 				index: idx,
@@ -615,7 +579,7 @@
 		src = new google.maps.LatLng(48.856614, 2.3522219) // paris
 		//src = new google.maps.LatLng(35.6894875, 139.6917064) // 도쿄
 		infowindow = new google.maps.InfoWindow();
-		initAutocomplete();
+		initAutocomplete("establishment");
 
 	}
 
@@ -670,7 +634,7 @@
 					isExist = false;
 					return false;
 				}else{
-					isExist = true;
+					isExist = false;
 					return false;
 				}
 			}
@@ -741,7 +705,7 @@
 	function stroll() {
 
   		var modes = document.getElementsByName("routemode");
-		console.log(modes);
+		//console.log(modes);
   		var places = [];
   		var waypts = [];
   		var routeyn = [];
@@ -760,7 +724,7 @@
 			index++;
 		});
 
-		console.log(routeyn);
+		//console.log(routeyn);
 		select = ".accordionsub";
 
 		index = 0;
@@ -1119,15 +1083,25 @@
 	<tr>
 	<td style="width:250px">
       <div>
-        여행title 
+		<div>
+        	여행title 
 		<select name="tourlist" id="tourlist">
 		<option value="0">선택</option>
 		{% for list in ctour_list %}
 		<option value="{{ list[0] }}">{{ list[1] }} </option>
 		{% endfor %}
 		</select>
-		<input type=text" name="ctour_title" id="ctour_title" class="form-control" placeholder="여행제목" required autofocus value="">
+		</div>
+		<div>여행제목
+		<input type=text" name="ctour_title" id="ctour_title" class="form-control" placeholder="여행제목" required autofocus value="" size=15>
 		<button id='init' onclick="javascript:initwaypoints();initcTourInfo();_saveSession()">신규</button>
+		</div>
+		<div>공개여부
+		<select name="openyn" id="openyn">
+		<option value="Y">공개</option>
+		<option value="N">비공개</option>
+		</select>
+		</div>
       </div>
 	</td>
 	<td>
@@ -1284,6 +1258,5 @@
         <li>List item two</li>
         <li>List item three</li>
       </ul>
-    </div>
     </div>
 -->
