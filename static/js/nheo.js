@@ -144,5 +144,4 @@ $(function(){
 	});
 
 	$("#accordiaon").accordion();
-
 });
