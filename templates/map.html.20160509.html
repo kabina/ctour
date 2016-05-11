@@ -81,7 +81,7 @@
     		$( "#accordion" )
       		.accordion({
         		header: "> div > h3",
-				collapsible: false
+				collapsible: true
       		})
       		.sortable({
         		handle: "h3",
@@ -103,7 +103,7 @@
     		$( accr ).each(function() {
       			$(this).accordion({
        				header: "> div > h4",
-					collapsible: false
+					collapsible: true
       			})
       			.sortable({
        				handle: "h4",
@@ -186,30 +186,12 @@
   		// location types.
   		autocomplete = new google.maps.places.Autocomplete(
       		/** @type {!HTMLInputElement} */(document.getElementById('address_start')),
-      	{types: ['establishment']});
-		autocomplete.bindTo('bounds', map);
+      	{types: ['geocode']});
 		
   		// When the user selects an address from the dropdown, populate the address
   		// fields in the form.
   		//autocomplete.addListener('place_changed');
-  		//autocomplete.addListener('place_changed', fillInAddress());
-  		autocomplete.addListener('place_changed', function() {
-			var place = autocomplete.getPlace();
-			console.log(place);
-    			if (!place.geometry) {
-      			window.alert("Autocomplete's returned place contains no geometry");
-      			return;
-    			}
-			
-    			// If the place has a geometry, then present it on a map.
-    			if (place.geometry.viewport) {
-      					map.fitBounds(place.geometry.viewport);
-    			} else {
-      					map.setCenter(place.geometry.location);
-      					map.setZoom(17);  // Why 17? Because it looks good.
-    			}
-			searchByPlaceId(place.place_id);
-		});
+  		autocomplete.addListener('place_changed', fillInAddress());
 
   		autocomplete2 = new google.maps.places.Autocomplete(
       		/** @type {!HTMLInputElement} */(document.getElementById('address_end')),
@@ -226,24 +208,9 @@
 		// [START region_fillform]
 	function fillInAddress() {
   		// Get the place details from the autocomplete object.
-		
-		var place = autocomplete.getPlace();
-		console.log(place);
-    		if (!place.geometry) {
-      		window.alert("Autocomplete's returned place contains no geometry");
-      		return;
-    		}
-		
-    		// If the place has a geometry, then present it on a map.
-    		if (place.geometry.viewport) {
-      				map.fitBounds(place.geometry.viewport);
-    		} else {
-      				map.setCenter(place.geometry.location);
-      				map.setZoom(17);  // Why 17? Because it looks good.
-    		}
-		console.log("=================search place ===============");
-		searchByPlaceId(place.place_id);
+  		var place = autocomplete.getPlace();
 /*
+		
   		for (var component in componentForm) {
     		document.getElementById(component).value = '';
     		document.getElementById(component).disabled = false;
@@ -266,7 +233,6 @@
 	// Bias the autocomplete object to the user's geographical location,
 	// as supplied by the browser's 'navigator.geolocation' object.
 	function geolocate(component) {
-/*
   		if (navigator.geolocation) {
     		navigator.geolocation.getCurrentPosition(function(position) {
       		var geolocation = {
@@ -280,9 +246,59 @@
       		component.setBounds(circle.getBounds());
     		});
   		}
-*/
 	}
 	
+/*
+  $(function() {
+    $( "#accordionsub" )
+      .accordion({
+        header: "> div > h4",
+		collapsible: true
+      })
+      .sortable({
+        handle: "h4",
+        stop: function( event, ui ) {
+          // IE doesn't register the blur when sorting
+          // so trigger focusout handlers to remove .ui-state-focus
+          ui.item.children( "h4" ).triggerHandler( "focusout" );
+ 
+          // Refresh accordion to handle new order
+          $( this ).accordion( "refresh" );
+        }
+      });
+	$("h3").click(function() {
+		_preview(this.textContent);
+	});
+	$("h4").click(function() {
+		searchDetail(this.id);
+	});
+	$(".group").mousedown(function() {
+		if(event.which == 3) {
+			if(confirm('삭제하시겠습니까?'))
+				this.remove();
+				_saveSession();
+		}
+	});
+
+    $( "#accordion" )
+      .accordion({
+        header: "> div > h3",
+		collapsible: true
+      })
+      .sortable({
+        handle: "h3",
+        stop: function( event, ui ) {
+          // IE doesn't register the blur when sorting
+          // so trigger focusout handlers to remove .ui-state-focus
+          ui.item.children( "h3" ).triggerHandler( "focusout" );
+ 
+          // Refresh accordion to handle new order
+          $( this ).accordion( "refresh" );
+		  _saveSession();
+        }
+      });
+  });
+*/
 	function _saveSession() {
 
 		idx = 1;
@@ -326,13 +342,12 @@
 	}
 	function _changenights(idx) {
 		select = ".accordionsub";
-		//nights = $(select).eq(cmenu).find(".wp_nights").val();
-		nights = document.getElementsByName("wp_nights");
+		$(select).eq(cmenu).find("#wp_nights").val();
 		// nights = document.getElementById("wp_nights"+idx).value;
-		console.log("nights:"+nights[idx].value+" index:"+idx);
+		console.log(nights);
 		//$("h3")[idx].attr("id",nights);
-		//$("h3")[idx].id = nights;
-		$("h3")[idx].textContent = nights[idx].value+"일 "+$("h3")[idx].title;
+		$("h3")[idx].id = nights;
+		$("h3")[idx].textContent = nights+"일 "+$("h3")[idx].title;
 
 		//document.getElementById("ctour_days").value = document.getElementById("ctour_days").value 
 		//alert(title);
@@ -342,7 +357,7 @@
 
 		total_nights = 0;
 		for(idx = 0; idx < wptcnt; idx++) {
-			total_nights += parseInt(nights[idx].value);
+			total_nights += parseInt($("h3")[idx].id);
 		}
 		document.getElementById("ctour_days").value = total_nights;
 	}
@@ -374,7 +389,7 @@
 			cost = ctour_wpt[idx][6];
 			distance = ctour_wpt[idx][7];
 			totalnights += nights;
-			var toAdd = "<div class='group' ><h3 title='"+waypts+"' id="+nights+" data-addr=\""+addr+"\"> "+nights+"일 "+waypts+"</h3><div style='width:200px;' class='accordionsub' ><table ><tr><td>체류:<input type=text name=wp_nights class=wp_nights value="+nights+" size=2 onchange=\"javascript:_changenights("+(idx)+")\"> 박 </td><td>"+
+			var toAdd = "<div class='group' ><h3 title='"+waypts+"' id="+nights+" data-addr=\""+addr+"\"> "+nights+"일 "+waypts+"</h3><div style='width:200px;' class='accordionsub' ><table ><tr><td>체류:<input type=text id=wp_nights value="+nights+" size=2 onchange=\"javascript:_changenights("+(idx)+")\"> 박 </td><td>"+
 " 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
 " <input type=button id="+idx+" class=stroll name=innerroute value='동선' onclick='javascript:stroll(this)'></td></tr><tr><td colspan=2>거리:<input type=text class=wp_distance name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type=text  id=wp_note name=wp_note value='"+note+"' size=20 ></td></tr><tr><td colspan=2>비용:<input type=text id=wp_cost name=wp_cost size=10 value=''/></td></tr></table></div></div>";  
 			$("#accordion").append(toAdd);
@@ -401,7 +416,7 @@
 			ictour_place_routeinfo = ctour_place[idx][9];
 
 		//select = ".accordionsub";
-		//$(select).eq(cmenu).find(".wp_nights").val();
+		//$(select).eq(cmenu).find("#wp_nights").val();
 
 			select = $(".accordionsub:eq("+(parseInt(ictour_wpt)-1)+")");
 
@@ -660,18 +675,14 @@
 		select = $(".accordionsub").eq(cmenu);
 
 		select.append("<div class=\"groupsub\"><h4 id='"+pid+"' title='' data-addr='"+place_addr+"'>"+title+"</h4><div><label>주소</label><input type=text size=15 value='"+place_addr+"' readonly><label>메모</label><input type=text class=memo name=memo size=15 value=''><br><label>비용</label><input type=text class=cost name=cost size=5 value=''/><br><label>동선제외</label><input type=checkbox class=routeyn name=routeyn/><br><label>다음장소</label><input type=text size=15 class=routeinfo name=routeinfo readonly value=''/><br><center><button name=deleteplace class=deleteplace onclick='javascript:_deleteplace(this)' value='장소삭제'>장소삭제</button></      center></div></div>");
-		$(select).find("h4").unbind("click").bind("click",function() {
-			searchByPlaceId(this.id);
-		});
-		$(select).sortable().accordion("refresh");
-		refresharcsub();
+		select = $(".accordionsub").eq(cmenu);
 		refresharc();
+		refresharcsub(cmenu);
+		$(select).sortable().accordion("refresh");
 		$("#accordion").sortable().accordion("refresh");
-/*
 		$("h4").bind("click",function() {
 			searchByPlaceId(this.id);
 		});
-*/
 
 
 	}
@@ -748,7 +759,7 @@
       		travelMode: google.maps.TravelMode[selectedMode]
   		};
   		directionsService.route(request, function(response, status) {
-			routesteps = [];
+			routesteps
 			var legs = response.routes[0].legs;
 			for(index = 0; index < legs.length ; index ++ ) {
 				routesteps.push({
@@ -761,19 +772,26 @@
 			index = 0;
 			stepindex = 0;
 			distance_total = 0;
+			console.log(routeyn);
+			console.log(routesteps);
 			$(".accordionsub").eq(cmenu).find(".groupsub > div > .routeinfo").each(function () {
+				console.log(index);
+				console.log(stepindex);
 				if(routeyn.includes(index)) {
 					index ++;
 					this.value = "";
 					return true;
 				}else {
+					console.log("============");
+					console.log(stepindex);
+					console.log("============");
+					console.log(stepindex);
 					this.value = "";
 					if((stepindex) >= routesteps.length) {
-						return true;
-					}else{
-						this.value = routesteps[stepindex].distance+", "+routesteps[stepindex].duration;
-						distance_total += parseInt(routesteps[stepindex].distance);
+						return false;
 					}
+					this.value = routesteps[stepindex].distance+", "+routesteps[stepindex].duration;
+					distance_total += parseInt(routesteps[stepindex].distance);
 					stepindex ++;
 					index ++;
 				}
@@ -1243,6 +1261,5 @@
         <li>List item two</li>
         <li>List item three</li>
       </ul>
-    </div>
     </div>
 -->

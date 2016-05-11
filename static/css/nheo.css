@@ -1,0 +1,76 @@
+body {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+ 
+.form-nheo {
+  max-width: 230px;
+  padding: 15px;
+  margin: 5 auto;
+}
+.form-nheo .form-signin-heading,
+.form-nheo .checkbox {
+  margin-bottom: 10px;
+}
+.form-nheo .checkbox {
+  font-weight: normal;
+}
+.form-nheo .form-control {
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 10px;
+  font-size: 15px;
+}
+.form-nheo .form-control:focus {
+  z-index: 2;
+}
+.form-nheo input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.form-nheo input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+#thumbnail{
+	margin:0px; background-color:#AAAAAA; auto; border-left:0px solid #333333; border-right:0px solid #333333; float:left;
+}
+
+#nearby{
+	margin:0px; background-color:yellow;auto; border-left:0px solid #333333; border-right:0px solid #333333; float:left;
+}
+
+.pop-layer {
+	display:none; position: absolute; top: 50%; left: 50%; width: 450px; height:auto;  background-color:#fff; border: 5px solid #3571B5; z-index: 10;} 
+.pop-layer .pop-container {padding: 20px 25px;}
+.pop-layer p.ctxt {color: #666; line-height: 25px;}
+.pop-layer .btn-r {width: 100%; margin:10px 0 20px; padding-top: 10px; border-top: 1px solid #DDD; text-align:right;}
+ 
+a.cbtn {
+	display:inline-block; height:25px; padding:0 14px 0; border:1px solid #304a8a; background-color:#3f5a9d; font-size:13px; color:#fff; line-height:25px;}
+a.cbtn:hover {border: 1px solid #091940; background-color:#1f326a; color:#fff;}
+
+dy.dragging, body.dragging * {
+  cursor: move !important;
+}
+
+.dragged {
+  position: absolute;
+  opacity: 0.5;
+  z-index: 2000;
+}
+
+ol.example li.placeholder {
+  position: relative;
+  /** More li styles **/
+}
+ol.example li.placeholder:before {
+  position: absolute;
+  /** Define arrowhead **/
+}

@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<head>
+    <title>Google Map Test</title>
+    <link href="../static/css/nheo.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+
+    <script type="text/javascript" src="../static/js/jquery-1.12.1.js"></script>
+    <script type="text/javascript" src="../static/js/jquery-sortable.js"></script>
+	<script type="text/javascript" src="../static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../static/js/nheo.js"></script>
+    
+	<script
+	src="http://maps.googleapis.com/maps/api/js?libraries=places">
+	</script>
+	<link rel="stylesheet" href="../static/css/jquery-ui.css">
+	<!-- <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> -->
+	<!-- <script src="http://code.jquery.com/jquery-1.10.2.js"></script> -->
+	<!-- <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script> -->
+	<script src="../static/js/jquery-ui.js"></script>
+	<!-- <link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css"> -->
+	<style>
+	/* IE has layout issues when sorting (see #5413) */
+	.accordionsub { zoom: 0;width:200px; background-color:#eedddd}
+	.group { zoom: 0;width:200px }
+	.groupsub { zoom: 1 ;width:170px;background-color:#ddeedd}
+	.draggable { width: 100px; height: 10px; padding: 0.1em; float: left; margin: 1px 1px 10px       0; background-color:#AAAAAA;}
+	.droppable { width: 200px; height: 200px; padding: 0.5em; float: left; margin: 10px 10px 10px       0; background-color:#CCCCCC;}
+	label {
+		display: inline-block;
+		width: 50px;
+		text-align: right;
+	}
+	</style>
+	<script>
+
+	var directionsDisplay;
+	var directionsService = new google.maps.DirectionsService();
+	var src
+	var dest
+	var marker
+	var nearMarkerMap = new Map();
+	var bounds = new google.maps.LatLngBounds();
+	var wptarr = [];
+	var wptcnt = 0;
+ 	var cmenu = 0;
+	var objplace
+	var routesteps = [];
+
+	var placeSearch, autocomplete, autocomplete2;
+	var componentForm = {
+  		street_number: 'short_name',
+  		route: 'long_name',
+  		locality: 'long_name',
+  		administrative_area_level_1: 'short_name',
+  		country: 'long_name',
+  		postal_code: 'short_name'
+	};
+
+	function myEventHandler(e)
+	{
+    	if (!e)
+      	e = window.event;
+	
+    	//IE9 & Other Browsers
+    	if (e.stopPropagation) {
+      	e.stopPropagation();
+    	}
+    	//IE8 and Lower
+    	else {
+      	e.cancelBubble = true;
+    	}
+	}
+
+	function _deleteplace(obj) {
+		obj.parentNode.parentNode.parentNode.remove();
+		//console.log(obj.parentNode.parentNode.remove());
+	}
+
+	function refresharc() {
+  		$(function() {
+    		$( "#accordion" )
+      		.accordion({
+        		header: "> div > h3",
+				collapsible: false
+      		})
+      		.sortable({
+        		handle: "h3",
+        		stop: function( event, ui ) {
+          		// IE doesn't register the blur when sorting
+          		// so trigger focusout handlers to remove .ui-state-focus
+          		ui.item.children( "h3" ).triggerHandler( "focusout" );
+ 		
+          		// Refresh accordion to handle new order
+          		$( this ).accordion( "refresh" );
+        		}
+      		});
+		});
+	}
+
+	function refresharcsub() {
+  		$(function() {
+			var accr = ".accordionsub";
+    		$( accr ).each(function() {
+      			$(this).accordion({
+       				header: "> div > h4",
+					collapsible: false
+      			})
+      			.sortable({
+       				handle: "h4",
+       				stop: function( event, ui ) {
+         				// IE doesn't register the blur when sorting
+         				// so trigger focusout handlers to remove .ui-state-focus
+         				ui.item.children( "h4" ).triggerHandler( "focusout" );
+ 			
+         				// Refresh accordion to handle new order
+         				$( this ).accordion( "refresh" );
+					stroll();
+       				}
+      			});
+			});
+		});
+		
+		//refreshitem();
+	}
+	function refreshitem() {
+		$(function() {
+			//event.stopPropagation();
+			$(".group").mousedown(function() {
+				if(event.which == 3) {
+					console.log(this);
+					if(confirm(this.textContent+' 삭제하시겠습니까?')) {
+						wptcnt--;
+						this.remove();
+					}
+				}
+			});
+			$("h3").unbind("click").bind("click",function() {
+      			cmenu = $('h3').index(this);
+				console.log("=======================");
+				console.log(cmenu);
+				console.log("=======================");
+				_preview(this.title);
+			});
+			$("h4").unbind("click").bind("click",function() {
+				searchByPlaceId(this.id);
+			});
+  			$('.group').unbind("click").bind("click",function(){
+      			cmenu = $('.group').index(this);
+				});
+		});
+	}
+
+	function refreshh4() {
+			$("h4").unbind("click").bind("click",function() {
+				searchByPlaceId(this.id);
+			});
+	}
+
+	function _initDroppable() {
+  		$('.draggable').draggable({
+			helper: 'clone',
+			cursor: 'move',
+			refreshPosition: true,
+			revert: "invalid"
+		});
+  		$('.group').droppable({
+				greedy:true,
+				accept:".draggable",
+	    		drop: function( event, ui ) {
+					_addplace(ui.draggable.attr('name'), ui.draggable.attr('pid'), ui.draggable.attr('addr'));
+        		}
+  	  		});
+	}
+
+
+	function additem() {
+		if(cmenu<0) alert("no available menu");
+		else {
+			topmenu = "#ul"+cmenu;
+			$(topmenu).append("<li><a href=\"#\">test</a></li>");	
+		}
+	}
+	
+	function initAutocomplete() {
+  		// Create the autocomplete object, restricting the search to geographical
+  		// location types.
+  		autocomplete = new google.maps.places.Autocomplete(
+      		/** @type {!HTMLInputElement} */(document.getElementById('address_start')),
+      	{types: ['establishment']});
+		autocomplete.bindTo('bounds', map);
+		
+  		// When the user selects an address from the dropdown, populate the address
+  		// fields in the form.
+  		//autocomplete.addListener('place_changed');
+  		//autocomplete.addListener('place_changed', fillInAddress());
+  		autocomplete.addListener('place_changed', function() {
+			var place = autocomplete.getPlace();
+			console.log(place);
+    			if (!place.geometry) {
+      			window.alert("Autocomplete's returned place contains no geometry");
+      			return;
+    			}
+			
+    			// If the place has a geometry, then present it on a map.
+    			if (place.geometry.viewport) {
+      					map.fitBounds(place.geometry.viewport);
+    			} else {
+      					map.setCenter(place.geometry.location);
+      					map.setZoom(17);  // Why 17? Because it looks good.
+    			}
+			searchByPlaceId(place.place_id);
+		});
+
+  		autocomplete2 = new google.maps.places.Autocomplete(
+      		/** @type {!HTMLInputElement} */(document.getElementById('address_end')),
+      	{types: ['geocode']});
+		
+  		// When the user selects an address from the dropdown, populate the address
+  		// fields in the form.
+  		//autocomplete2.addListener('place_changed');
+  		autocomplete2.addListener(autocomplete2, 'place_changed', function() {
+			fillInAddress();
+		});
+	}
+		
+		// [START region_fillform]
+	function fillInAddress() {
+  		// Get the place details from the autocomplete object.
+		
+		var place = autocomplete.getPlace();
+		console.log(place);
+    		if (!place.geometry) {
+      		window.alert("Autocomplete's returned place contains no geometry");
+      		return;
+    		}
+		
+    		// If the place has a geometry, then present it on a map.
+    		if (place.geometry.viewport) {
+      				map.fitBounds(place.geometry.viewport);
+    		} else {
+      				map.setCenter(place.geometry.location);
+      				map.setZoom(17);  // Why 17? Because it looks good.
+    		}
+		console.log("=================search place ===============");
+		searchByPlaceId(place.place_id);
+/*
+  		for (var component in componentForm) {
+    		document.getElementById(component).value = '';
+    		document.getElementById(component).disabled = false;
+  		}
+		
+  		// Get each component of the address from the place details
+  		// and fill the corresponding field on the form.
+  		for (var i = 0; i < place.address_components.length; i++) {
+    		var addressType = place.address_components[i].types[0];
+    		if (componentForm[addressType]) {
+      		var val = place.address_components[i][componentForm[addressType]];
+      		document.getElementById(addressType).value = val;
+    		}
+  		}
+*/
+	}
+	// [END region_fillform]
+	
+	// [START region_geolocation]
+	// Bias the autocomplete object to the user's geographical location,
+	// as supplied by the browser's 'navigator.geolocation' object.
+	function geolocate(component) {
+/*
+  		if (navigator.geolocation) {
+    		navigator.geolocation.getCurrentPosition(function(position) {
+      		var geolocation = {
+        		lat: position.coords.latitude,
+        		lng: position.coords.longitude
+      		};
+      		var circle = new google.maps.Circle({
+        		center: geolocation,
+        		radius: position.coords.accuracy
+      		});
+      		component.setBounds(circle.getBounds());
+    		});
+  		}
+*/
+	}
+	
+	function _saveSession() {
+
+		idx = 1;
+		wptarr = []
+		$("h3").each(function() {
+			wptarr.push({
+				index: "wpt"+idx,
+				wptnm: this.title
+			});
+			sessionStorage.setItem("wpt"+idx, this.title);
+			idx+=1;
+		});
+
+		sessionStorage.setItem("wptcnt",idx-1);
+
+		var master = {ctour_seq:document.getElementById("ctour_seq").value,
+						ctour_title:document.getElementById("ctour_title").value,
+						ctour_days:document.getElementById("ctour_days").value,
+						address_start:document.getElementById("address_start").value,
+						address_end:document.getElementById("address_end").value,
+						waypoints:wptarr}
+		sessionStorage.setItem("ctour_seq", document.getElementById("ctour_seq").value);
+		sessionStorage.setItem("ctour_title", document.getElementById("ctour_title").value);
+		sessionStorage.setItem("ctour_days", document.getElementById("ctour_days").value);
+		sessionStorage.setItem("address_start", document.getElementById("address_start").value);
+		sessionStorage.setItem("address_end", document.getElementById("address_end").value);
+		//console.log(sessionStorage.getItem("ctour_title"));
+	}
+	function initwaypoints() {
+		$(".group").each(function() {
+				this.remove();
+			});
+	}
+
+	function initcTourInfo() {
+		document.getElementById("ctour_seq").value='-1';
+		document.getElementById("ctour_title").value='';
+		document.getElementById("ctour_days").value='';
+		document.getElementById("address_start").value='';
+		document.getElementById("address_end").value='';
+	}
+	function _changenights(idx) {
+		select = ".accordionsub";
+		//nights = $(select).eq(cmenu).find(".wp_nights").val();
+		nights = document.getElementsByName("wp_nights");
+		// nights = document.getElementById("wp_nights"+idx).value;
+		console.log("nights:"+nights[idx].value+" index:"+idx);
+		//$("h3")[idx].attr("id",nights);
+		//$("h3")[idx].id = nights;
+		$("h3")[idx].textContent = nights[idx].value+"일 "+$("h3")[idx].title;
+
+		//document.getElementById("ctour_days").value = document.getElementById("ctour_days").value 
+		//alert(title);
+		//$("h3")[idx].attr("textContent",nights+"일 "+title);
+		//document.getElementById("
+
+
+		total_nights = 0;
+		for(idx = 0; idx < wptcnt; idx++) {
+			total_nights += parseInt(nights[idx].value);
+		}
+		document.getElementById("ctour_days").value = total_nights;
+	}
+
+	function routeyn(obj) {
+		if(obj.checked==true) obj.value='0'
+		else obj.value='1'
+	}
+		//$(select).eq(cmenu).find(".groupsub > h4").each(function() {
+	function _loadTourDetail(ctour_master, ctour_wpt, ctour_place) {
+
+		document.getElementById("ctour_seq").value =  ctour_master[0];
+		document.getElementById("ctour_title").value = ctour_master[1];
+		document.getElementById("ctour_days").value = ctour_master[2];
+		document.getElementById("address_start").value = ctour_master[3];
+		document.getElementById("address_end").value = ctour_master[4];
+
+		wptcnt = ctour_wpt.length;
+		if(wptcnt>0) {
+			initwaypoints();
+		}
+		var totalnights = 0;
+		console.log(ctour_wpt);
+		for(idx = 0; idx < wptcnt; idx ++ ) {
+			waypts = ctour_wpt[idx][2];
+			nights = ctour_wpt[idx][3];
+			addr = ctour_wpt[idx][4];
+			note = ctour_wpt[idx][5];
+			cost = ctour_wpt[idx][6];
+			distance = ctour_wpt[idx][7];
+			totalnights += nights;
+			var toAdd = "<div class='group' ><h3 title='"+waypts+"' id="+nights+" data-addr=\""+addr+"\"> "+nights+"일 "+waypts+"</h3><div style='width:200px;' class='accordionsub' ><table ><tr><td>체류:<input type=text name=wp_nights class=wp_nights value="+nights+" size=2 onchange=\"javascript:_changenights("+(idx)+")\"> 박 </td><td>"+
+" 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
+" <input type=button id="+idx+" class=stroll name=innerroute value='동선' onclick='javascript:stroll(this)'></td></tr><tr><td colspan=2>거리:<input type=text class=wp_distance name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type=text  id=wp_note name=wp_note value='"+note+"' size=20 ></td></tr><tr><td colspan=2>비용:<input type=text id=wp_cost name=wp_cost size=10 value=''/></td></tr></table></div></div>";  
+			$("#accordion").append(toAdd);
+		}
+		
+
+		//refresharc();
+		//$("#accordion").sortable().accordion("refresh");
+		//refresharcsub(cmenu);
+		//$(".accordionsub").sortable().accordion("refresh");
+		document.getElementById("ctour_days").value = totalnights;
+
+		placecnt = ctour_place.length;
+
+		for(idx = 0; idx < placecnt; idx ++) {
+			ictour_wpt = ctour_place[idx][1];
+			ictour_place_seq = ctour_place[idx][2];
+			ictour_place_id = ctour_place[idx][3];
+			ictour_place_name = ctour_place[idx][4];
+			ictour_place_addr = ctour_place[idx][5];
+			ictour_place_note = ctour_place[idx][6];
+			ictour_place_cost = ctour_place[idx][7];
+			ictour_place_routeyn = ctour_place[idx][8];
+			ictour_place_routeinfo = ctour_place[idx][9];
+
+		//select = ".accordionsub";
+		//$(select).eq(cmenu).find(".wp_nights").val();
+
+			select = $(".accordionsub:eq("+(parseInt(ictour_wpt)-1)+")");
+
+			select.append("<div class=\"groupsub\"><h4 id='"+ictour_place_id+"' title='' data-addr='"+ictour_place_addr+"'>"+ictour_place_name+"</h4><div><label>주소</label><input type=text size=15 value='"+ictour_place_addr+"' readonly><br><label>메모</label><input type=text class=memo size=15 value='"+ictour_place_note+"'/><br><label>비용</label><input type=text class=cost size=5 value='"+ictour_place_cost+"'/><br><label>동선제외</label><input type=checkbox class=routeyn name=routeyn value='' onclick='javascript:routeyn(this)' "+(parseInt(ictour_place_routeyn)==0?"checked":"")+" /><br>"+
+	"<label>다음장소</label><input type=text size=15 class=routeinfo name=routeinfo readonly value='"+ictour_place_routeinfo+"'/><br>"+
+	"<center><button name=deleteplace class=deleteplace onclick='javascript:_deleteplace(this)' value='장소삭제'>장소삭제</button></center></div></div>");
+			$(select).find("h4").unbind("click").bind("click",function() {
+				searchByPlaceId(this.id);
+			});
+		}
+
+		refresharc();
+		refresharcsub();
+		  //$(".accordionsub").eq(0).sortable().accordion("refresh"); // accordion sub에 실제 영향
+		//refresharc();
+		$("#accordion").sortable().accordion("refresh");
+		//refreshh4();
+		//$(".accordionsub").sortable().accordion("refresh");
+
+		_initDroppable();
+	}
+
+	function _getTourInfo() {
+		dataarr = [];
+		datawptarr = [];
+		idx = 1;
+
+		note = document.getElementsByName("wp_note");
+		cost = document.getElementsByName("wp_cost");
+		distance = document.getElementsByName("wp_distance");
+
+		$("h3").each(function() {
+      		cmenu = $('.group').index(this);
+		
+			dataarr.push({
+				index: idx,
+				wptnm: this.title,
+				nights: this.id,
+				addr: this.getAttribute("data-addr"),
+				note: note[idx-1].value,
+				cost: cost[idx-1].value,
+				distance: distance[idx-1].value
+			});
+			idx ++;
+		});
+
+		//select = "#accordionsub > .groupsub > h4";
+		idx = 1;
+		select = ".accordionsub";
+		$(select).each(function() {
+
+			memo = [];
+			pcost = [];
+			routeyn = [];
+			routeinfo = [];
+
+			memo_idx = 0;
+			cost_idx = 0;
+			routeyn_idx = 0;
+			routeinfo_idx = 0;
+
+			select_memo = $(" > .groupsub > div > .memo", this);
+			select_cost = $(" > .groupsub > div > .cost", this);
+			select_routeyn = $(" > .groupsub > div > .routeyn", this);
+			select_routeinfo = $(" > .groupsub > div > .routeinfo", this);
+			
+			$(select_memo).each(function() {
+				memo[memo_idx] = this.value ;
+				memo_idx ++
+			});
+			$(select_cost).each(function() {
+				pcost[cost_idx] = this.value ;
+				cost_idx ++
+			});
+			$(select_routeyn).each(function() {
+				routeyn[routeyn_idx] = this.checked?'0':'1' ;
+				routeyn_idx ++
+			});
+			$(select_routeinfo).each(function() {
+				routeinfo[routeinfo_idx] = this.value;
+				routeinfo_idx ++
+			});
+
+			place_seq = 1;
+			select_sub = $(" > .groupsub > h4", this);
+			$(select_sub).each(function() {
+
+				datawptarr.push({
+					index: idx,
+					place_seq: place_seq,
+					place_id: this.id,
+					place_name: this.textContent,
+					place_addr: this.getAttribute("data-addr"),
+					place_note: memo[place_seq-1],
+					place_cost: pcost[place_seq-1],
+					place_routeyn: routeyn[place_seq-1],
+					place_routeinfo: routeinfo[place_seq-1]
+				});
+				place_seq ++;
+			});
+			idx ++;
+		});
+
+		var master = {ctour_seq:document.getElementById("ctour_seq").value,
+						ctour_title:document.getElementById("ctour_title").value,
+						ctour_days:document.getElementById("ctour_days").value,
+						address_start:document.getElementById("address_start").value,
+						address_end:document.getElementById("address_end").value,
+						waypoints:dataarr, places:datawptarr}
+		return master;
+	}
+
+
+	function layer_open(el){
+ 	
+		var temp = $('#' + el);     //레이어의 id를 temp변수에 저장
+		var bg = temp.prev().hasClass('bg');    //dimmed 레이어를 감지하기 위한 boolean 변수
+ 		
+		if(bg){
+			$('.layer').fadeIn();
+		}else{
+			temp.fadeIn();  //bg 클래스가 없으면 일반레이어로 실행한다.
+		}
+ 		
+		// 화면의 중앙에 레이어를 띄운다.
+		if (temp.outerHeight() < $(document).height() ) temp.css('margin-top', '-'+temp.outerHeight()/2+'px');
+		else temp.css('top', '0px');
+		if (temp.outerWidth() < $(document).width() ) temp.css('margin-left', '-'+temp.outerWidth()/2+'px');
+		else temp.css('left', '0px');
+ 		
+		temp.find('a.cbtn').click(function(e){
+			if(bg){
+				$('.layer').fadeOut();
+			}else{
+				temp.fadeOut();     //'닫기'버튼을 클릭하면 레이어가 사라진다.
+			}
+			e.preventDefault();
+		});
+ 		
+		$('.layer .bg').click(function(e){
+			$('.layer').fadeOut();
+			e.preventDefault();
+		});
+ 	
+	} 
+
+	function initialize()
+	{
+	directionsDisplay = new google.maps.DirectionsRenderer();
+
+  		var mapProp = {
+    		//center: 서울
+    		center: new google.maps.LatLng(37.566535,126.9779692),
+    		zoom:8,
+    		panControl:true,
+    		zoomControl:true,
+    		mapTypeControl:true,
+    		scaleControl:true,
+    		streetViewControl:true,
+    		overviewMapControl:true,
+    		rotateControl:true,    
+    		mapTypeId: google.maps.MapTypeId.ROADMAP
+  		};
+
+  		map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
+		directionsDisplay.setMap(map);
+		directionsDisplay.setPanel(document.getElementById("directionsPannel"));
+		marker = new google.maps.Marker();
+		//src = new google.maps.LatLng(37.5117887, 126.8395951) // 신정도일하이빌
+		src = new google.maps.LatLng(48.856614, 2.3522219) // paris
+		//src = new google.maps.LatLng(35.6894875, 139.6917064) // 도쿄
+		infowindow = new google.maps.InfoWindow();
+		initAutocomplete();
+
+	}
+
+	google.maps.event.addDomListener(window, 'load', initialize);
+
+	function searchMap(response) {
+		dest = new google.maps.LatLng(response.results[0].geometry.location.lat,response.results[0].geometry.location.lng);
+
+		map.panTo(dest);
+		switch(response.results[0].address_components.length) {
+			case 1: map.setZoom(9); break;
+			case 2: map.setZoom(10); break;
+			case 3: map.setZoom(11); break;
+			case 4: map.setZoom(12); break;
+			case 5: map.setZoom(13); break;
+			case 6: map.setZoom(14); break;
+			default: map.setZoom(8); break;
+			
+		}
+		unsetMarker(marker);
+		setMarker(dest, response.results[0].formatted_address, response.results[0].address_components[0].long_name, response.results[0].place_id);
+		searchDetail(response.results[0].place_id);
+	}
+
+	function moveLocation(dest, title) {
+
+		map.panTo(dest);
+		//unsetMarker(marker);
+		//setMarker(dest, title);
+	}
+
+	function setMarker(dest, addr, titlename, place_id) {
+		marker = new google.maps.Marker({
+			position: dest,
+			map: map,
+			title: titlename
+		});
+  		//google.maps.event.addListener(marker, 'click', function() {
+    		//infowindow.setContent(place.name);
+		mcontent = titlename+ " >>> <a href=\"javascript: _setwpt('"+addr+"');\">"+"여행지추가"+"</a><input type=text size=1 value='1' required>박<a href=\"javascript:_addplace('"+titlename+"', '"+place_id+"','"+addr+"')\">장소추가</a>";
+    	infowindow.setContent(mcontent);
+    	infowindow.open(map, marker);
+  		//});
+		marker.setMap(map)
+	}
+	function _setwpt(title) {
+		var isExist = false;
+		select = "h3";
+		$(select).each(function () {
+			if(this.getAttribute("title") == title) {
+				if(confirm("이미 존재하는 여행지입니다. 추가하시겠습니까?")){
+					isExist = false;
+					return false;
+				}else{
+					isExist = true;
+					return false;
+				}
+			}
+		});
+
+/*
+		wptarr.forEach(function(wpt) {
+			console.log(wpt.wptnm);
+			if(wpt.wptnm == title) {
+				if(confirm("이미 존재하는 경유지입니다. 추가하시겠습니까?"))
+				isExist = true;
+				else
+				isExist = false;
+				
+			}
+		});
+*/
+		if(!isExist) {
+			document.getElementById("wptid").value = title;
+			$("#wptbtn").click();
+			_saveSession();
+		}
+	}
+	function _addplace(title, pid, place_addr) {
+
+		console.log(cmenu);
+
+		select = $(".accordionsub").eq(cmenu);
+
+		select.append("<div class=\"groupsub\"><h4 id='"+pid+"' title='' data-addr='"+place_addr+"'>"+title+"</h4><div><label>주소</label><input type=text size=15 value='"+place_addr+"' readonly><label>메모</label><input type=text class=memo name=memo size=15 value=''><br><label>비용</label><input type=text class=cost name=cost size=5 value=''/><br><label>동선제외</label><input type=checkbox class=routeyn name=routeyn/><br><label>다음장소</label><input type=text size=15 class=routeinfo name=routeinfo readonly value=''/><br><center><button name=deleteplace class=deleteplace onclick='javascript:_deleteplace(this)' value='장소삭제'>장소삭제</button></      center></div></div>");
+		$(select).find("h4").unbind("click").bind("click",function() {
+			searchByPlaceId(this.id);
+		});
+		$(select).sortable().accordion("refresh");
+		refresharcsub();
+		refresharc();
+		$("#accordion").sortable().accordion("refresh");
+/*
+		$("h4").bind("click",function() {
+			searchByPlaceId(this.id);
+		});
+*/
+
+
+	}
+	function unsetMarker(marker) {
+		marker.setMap(null)
+	}
+	function procMapControl(response) {
+		dest = new google.maps.LatLng(response.results[0].geometry.location.lat,response.results[0].geometry.location.lng);
+		moveLocation(dest, response.results[0].formatted_address);
+		//var boundsk  new google.maps.LatLngBounds();
+		//map.fitBounds(bounds);
+		switch(response.results[0].address_components.length) {
+			case 1: map.setZoom(9); break;
+			case 2: map.setZoom(9); break;
+			case 3: map.setZoom(10); break;
+			case 4: map.setZoom(12); break;
+			case 5: map.setZoom(14); break;
+			case 6: map.setZoom(16); break;
+			default: map.setZoom(8); break;
+			
+		}
+		calcRoute();
+		directionsDisplay.setMap(map);
+	}
+
+	function stroll() {
+
+  		var modes = document.getElementsByName("routemode");
+		console.log(modes);
+  		var places = [];
+  		var waypts = [];
+  		var routeyn = [];
+
+		
+		selectedMode = modes[cmenu].options[modes[cmenu].selectedIndex].value;
+		clearNearBy();
+
+		selectroute = ".accordionsub";	
+		index = 0;
+
+		$(selectroute).eq(cmenu).find(".groupsub > div > .routeyn").each(function() {
+			if(this.checked==true)  {
+				routeyn.push(index);
+			}
+			index++;
+		});
+
+		console.log(routeyn);
+		select = ".accordionsub";
+
+		index = 0;
+		$(select).eq(cmenu).find(".groupsub > h4").each(function() {
+			if(routeyn.includes(index)) {
+				index ++;
+				return true;
+			}
+			places.push({
+				location: this.getAttribute("data-addr")
+			});
+			index ++ ;
+		});
+
+		for(idx=1;idx< (places.length-1);idx++) {
+			waypts.push({
+				location: places[idx].location,
+				stopover: true
+			});
+		}
+
+  		var request = {
+      		origin: places[0].location,
+      		destination: places[places.length-1].location,
+			waypoints:waypts,
+      		travelMode: google.maps.TravelMode[selectedMode]
+  		};
+  		directionsService.route(request, function(response, status) {
+			routesteps = [];
+			var legs = response.routes[0].legs;
+			for(index = 0; index < legs.length ; index ++ ) {
+				routesteps.push({
+					distance: legs[index].distance.text,
+					duration: legs[index].duration.text
+				});
+			}
+
+			
+			index = 0;
+			stepindex = 0;
+			distance_total = 0;
+			$(".accordionsub").eq(cmenu).find(".groupsub > div > .routeinfo").each(function () {
+				if(routeyn.includes(index)) {
+					index ++;
+					this.value = "";
+					return true;
+				}else {
+					this.value = "";
+					if((stepindex) >= routesteps.length) {
+						return true;
+					}else{
+						this.value = routesteps[stepindex].distance+", "+routesteps[stepindex].duration;
+						distance_total += parseInt(routesteps[stepindex].distance);
+					}
+					stepindex ++;
+					index ++;
+				}
+			});
+
+			$(".accordionsub").eq(cmenu).find(".wp_distance").each(function() {
+				this.value = distance_total;
+			});
+
+    		if (status == google.maps.DirectionsStatus.OK) {
+      		directionsDisplay.setDirections(response);
+    		}
+  		});
+	}
+
+	function calcRoute() {
+		if(document.getElementById("address_start").value=='') {
+			alert("#여행 시작지 정보 없음");
+			document.getElementById("address_start").focus();
+			return;
+		}else if(document.getElementById("address_end").value=='') {
+			alert("#여행 종착지 정보 없음");
+			document.getElementById("address_end").focus();
+			return;
+		}
+  		var selectedMode = document.getElementById("mode").value;
+  		var waypts = [];
+  		var checkboxArray = document.getElementById('waypoints');
+
+		_saveSession();
+		wptcnt = sessionStorage.getItem("wptcnt");
+		for(idx = 2; idx <= (wptcnt-1); idx ++ ) {
+			waypts.push({
+				location: sessionStorage.getItem("wpt"+idx),
+				stopover: true
+			});
+			console.log(sessionStorage.getItem("wpt"+idx));
+		}
+
+  		var request = {
+      		origin: sessionStorage.getItem("wpt1"),
+      		destination: sessionStorage.getItem("wpt"+wptcnt),
+			waypoints:waypts,
+      		travelMode: google.maps.TravelMode[selectedMode]
+  		};
+  		directionsService.route(request, function(response, status) {
+			console.log(status);
+    		if (status == google.maps.DirectionsStatus.OK) {
+      		directionsDisplay.setDirections(response);
+    		}
+  		});
+	}
+	function _setStartPlace() {
+		address_start = document.getElementById('address_start').value;
+		//document.getElementById("startplace").textContent = address_start;
+		_preview(address_start);
+	}
+	function _setEndPlace() {
+		address_end = document.getElementById('address_end').value;
+		//document.getElementById("endplace").textContent = address_end;
+		_preview(address_end);
+	}
+
+	function _preview(whereto) {
+		///document.getElementById("address").value = whereto;
+		//var wpts = $("a[class='wpt']").map(function(){return $(this).val();}).get();
+		clearNearBy();
+
+
+         $.ajax({
+             url: 'https://maps.googleapis.com/maps/api/geocode/json?address=\''+whereto+'\'',
+             data: $('.form-map').serialize(),
+             type: 'GET',
+             success: function(response){
+                 console.log(response);
+                 searchMap(response);
+             },
+             error: function(error){
+                 console.log(error);
+             }
+         });
+	}
+
+	function setGeo(response, wheretype, whereto) {
+			latlng =  new google.maps.LatLng(response.results[0].geometry.location.lat,response.results[0].geometry.location.lng);
+			eval("document.getElementById('"+wheretype+"_latlng').value="+latlng);
+			//wheretypeval.value = latlng;
+
+			//eval("document.getElementById('"+wheretype+"_latlng').value="+response.results[0].geometry.location.lat+";");
+	}
+
+	function _getGeo(address) {
+		var latlng
+         $.ajax({
+             url: 'https://maps.googleapis.com/maps/api/geocode/json?address='+address,
+             //data: $('.form-map').serialize(),
+             type: 'GET',
+             success: function(response){
+                 console.log(response);
+				 //return response;
+				latlng =  new google.maps.LatLng(response.results[0].geometry.location.lat,response.results[0].geometry.location.lng);
+             },
+             error: function(error){
+                 console.log(error);
+             }
+         });
+	}
+
+	function searchLocationByPid(pid) {
+		var request = {
+  			placeId: pid
+		};
+		
+		service = new google.maps.places.PlacesService(map);
+		service.getDetails(request, callback);
+
+	
+		function callback(place, status) {
+  			if (status == google.maps.places.PlacesServiceStatus.OK) {
+    			createMarker(place);
+  			}
+			objplace.push({
+			 location: place.formatted_address
+			});
+			//console.log(objplace);
+	
+		}
+	}
+
+	function searchByPlaceId(pid) {
+		var request = {
+			placeId: pid
+		};
+
+		service = new google.maps.places.PlacesService(map);
+		service.getDetails(request, callback);
+
+		map.setZoom(15);
+
+		clearNearBy();
+		function callback(place, status) {
+  				if (status == google.maps.places.PlacesServiceStatus.OK) {
+    				createMarker(place);
+					callback_searchDetail(place,'');
+  				}
+		}
+	}
+
+	function nearbysearch() {
+		var service = new google.maps.places.PlacesService(map);
+		var loc = map.getCenter();
+		e = document.getElementById("nearbytype");
+		type = e.options[e.selectedIndex].value;
+		service.nearbySearch({
+    	location: loc,
+    	radius: 500,
+    	types: [type]
+  		}, nearbysearch_callback);
+	}
+	function nearbysearch_callback(results, status) {
+		console.log(results);
+		clearNearBy();
+		bounds = new google.maps.LatLngBounds();
+		var appendimg = ""
+		//appendimg = "<div class='nearby' style='overflow:scroll;width=300px; height:110px' nowrap>";
+		$(".thumbnaillist").remove();
+		$(".detailthumbnaillist").remove();
+		appendimg = "<div class='thumbnaillist'>";
+  		if (status === google.maps.places.PlacesServiceStatus.OK) {
+    		for (var i = 0; i < results.length; i++) {
+      			createMarker(results[i]);
+				//alert("imgicon ="+ results[i].icon+ "name = "+results[i].name+"imgsrc ="+ results[i].photo[0].html_attributions[0]);
+				name = results[i].name;
+				id = results[i].place_id;
+				addr = results[i].vicinity;
+				console.log("=================================");
+				console.log(results[i]);
+				//if(results[i].icon != void[0]){
+					//imgicon = results[i].icon; 
+				//}
+				//if(results[i].photos!= void[0]){
+					//imgsrc = results[i].photos[0].html_attributions[0];
+				//}
+				//$("#nearbyphoto").append("<div>"+name+"<img src='"+imgicon+"'></div>");
+				if(results[i].photos !=void[0] ) {
+					//appendimg += "<div class='nearby' style='font:9pt;float:left'><a href=\"javascript:getDetailInfo('"+id+"');\" title=\""+name+"\"><img src=\""+results[i].photos[0].getUrl({'maxWidth': 100, 'MaxHeight': 100})+"\" style='height:100px' title=\""+name+"\"></a></div>";
+					appendimg += "<a href=\"javascript:getDetailInfo('"+id+"');\" title=\""+name+"\"><img class='draggable' name='"+name+"' pid='"+id+"' addr='"+addr+"' src=\""+results[i].photos[0].getUrl({'maxWidth': 100, 'MaxHeight': 100})+"\" style='height:100px' title=\""+name+"\"></a>";
+				} else {
+					//appendimg += "<div class='nearby' style='font:9pt;float:left'><a href=\"javascript:getDetailInfo('"+id+"');\">"+name+"</a></div>";
+					appendimg += "<a href=\"javascript:getDetailInfo('"+id+"');\">"+name+"</a>";
+				}
+			//console.log(results[i].photos[0].getUrl({'maxWidth': 100, 'MaxHeight': 100}));
+    		}
+			appendimg += "</div>";
+			$("#thumbnail").append(appendimg);
+			map.fitBounds(bounds);
+  		}
+		_initDroppable();
+	}
+
+	function searchDetail(pi) {
+		console.log("searchDetail:"+pi);
+		var request =  {
+			placeId: pi
+		};
+
+		service = new google.maps.places.PlacesService(map);
+		map.setZoom(15);
+		obj = service.getDetails(request, callback_searchDetail);
+	}
+
+	function callback_searchDetail(place, status) {
+			$("#detailinfo").remove();
+			$(".detailthumbnaillist").remove();
+			$("#detailplacename").remove();
+			$("#detailreviews").remove();
+			$("#thumbnaillist").remove();
+			$("#searchdetail").append("<div id='detailplacename' style='overflow:vscroll;float;left; height:300px' id=\"detailinfo\"><h2><a href=\"javascript:window.open('"+place.url+"')\">"+place.name+":"+place.formatted_address+"</a></h2> </div>");
+			d = new Date();
+
+			if(place.reviews != void[0]) 
+				for (var i = 0; i < place.reviews.length; i++) {
+					d.setTime(place.reviews[i].time*1000);
+					$("#detailplacename").append("<div id='detailreviews' style='float:left;font-size:9pt' id=\"detailinfo\">평점:"+place.reviews[i].rating+", "+d.toDateString()+", "+place.reviews[i].text+"</div>");
+					
+				}
+
+			if(place.photos != void[0]) {
+				for (var i = 0; i< place.photos.length; i++ )
+					$("#detailthumbnail").append("<div class='draggable detailthumbnaillist' style='font:9pt;float:left'><a href=\"javascript:largeView('"+place.photos[i].getUrl({'maxWidth': 410, 'MaxHeight': 410})+"');\" title=\""+place.name+"\"><img src=\""+place.photos[i].getUrl({'maxWidth': 100, 'MaxHeight': 100})+"\" style='height:100px' title=\""+place.name+"\"></a></div>");
+			}
+			map.panTo(place.geometry.location);
+			//createMarker(place);
+			return place;
+	}
+
+	function largeView(imgurl) {
+
+		$("#placedetailimg").remove();
+		$("#detailpopup").append("<div id='placedetailimg'><img src=\""+imgurl+"\"></div>");
+		layer_open('layer1')
+	}
+	
+	function createMarker(place) {
+  		var placeLoc = place.geometry.location;
+  		var marker = new google.maps.Marker({
+    		map: map,
+    		position: place.geometry.location
+  		});
+		bounds.extend(marker.position);
+		var mcontent = ""
+		if(place.photos == void[0] ) mcontent = place.name;
+		else mcontent = "<div><img src=\""+place.photos[0].getUrl({'maxWidth': 100, 'MaxHeight': 100})+"\"></div><div>"+place.name+"</div><div><a href=\"javascript: _addplace('"+place.name+"', '"+place.place_id+"', '"+place.vicinity+"');\">"+"장소추가"+"</a>";
+		
+  		google.maps.event.addListener(marker, 'click', function() {
+    		//infowindow.setContent(place.name);
+    		infowindow.setContent(mcontent);
+			console.log(mcontent);
+    		infowindow.open(map, this);
+  		});
+		nearMarkerMap.set(place.place_id, marker);
+	}
+	function clearNearBy() {
+		$(".nearby").remove();
+		for(var key of nearMarkerMap.keys()) {
+			nearMarker = nearMarkerMap.get(key);
+			nearMarker.setMap(null);
+		}
+	}
+	function getDetailInfo(id) {
+		searchDetail(id);
+		markerBounce(id);
+	}
+	function markerBounce(id) {
+		nearMarker = nearMarkerMap.get(id);
+		
+		nearMarkerMap.forEach(function(item, key, mapObj) {
+			if(id != key ) item.setAnimation(null);
+		});
+		if(nearMarker.getAnimation() != null) {
+			nearMarker.setAnimation(null);
+		}else{
+			nearMarker.setAnimation(google.maps.Animation.BOUNCE);
+		}
+	}
+	</script>
+</head>
+<body>
+<div>
+	<table width=100% height=100% border=1>
+	<tbody>
+	<tr>
+	<td colspan=2>
+      <div style="float:left">
+        Google Map Test
+      </div>
+      <div style="float:right">
+        {{ session.get("id") }} {{ session.get("name") }} <img src="{{ session.get("pic") }}" style="height:30px">
+      </div>
+        <form class="form-map" onsubmit='return false;'>
+	</td></tr>
+	<tr>
+	<td style="width:250px">
+      <div>
+        여행title 
+		<select name="tourlist" id="tourlist">
+		<option value="0">선택</option>
+		{% for list in ctour_list %}
+		<option value="{{ list[0] }}">{{ list[1] }} </option>
+		{% endfor %}
+		</select>
+		<input type=text" name="ctour_title" id="ctour_title" class="form-control" placeholder="여행제목" required autofocus value="">
+		<button id='init' onclick="javascript:initwaypoints();initcTourInfo();_saveSession()">신규</button>
+      </div>
+	</td>
+	<td>
+		<button id="nearBySearch" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:nearbysearch()">근처겁색</button>
+		<select name="nearbytype" id="nearbytype">
+		<option value="lodging">lodging </option>
+		<option value="park">park </option>
+		<option value="convenience_store">convenience_store </option>
+		<option value="grocery_or_supermarkt">grocery_or_supermarkt </option>
+		<option value="pharmacy">pharmacy </option>
+		<option value="police">police </option>
+		<option value="shopping_mall">shopping_mall </option>
+		<option value="subway_station">subway_station </option>
+		<option value="travel_agency">travel_agency </option>
+		<option value="amusement_park">amusement_park </option>
+		<option value="car_rental">car_rental </option>
+		<option value="gas_station">gas station </option>
+		<option value="university">university </option>
+		<option value="atm">atm</option>
+		<option value="hospital">hospital</option>
+		<option value="food">food</option>
+		<option value="church">church</option>
+		<option value="zoo">zoo</option>
+		<option value="airport">airport</option>
+		<option value="subway_station">subway_station</option>
+		<option value="train_station">train_station</option>
+		</select>
+		<div style="display:inline">
+        어디부터 <input type="name" name="address_start" id="address_start" class="form-control" value="" onFocus="javascript:geolocate(autocomplete)" placeholder="Where from ?" required autofocus >
+		<button id="preview" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:_setStartPlace()">위치확인</button>
+		</div>
+		<div style="display:inline">
+        어디까지 <input type="name" name="address_end" id="address_end" class="form-control" placeholder="Where to ?" value="" required autofocus onFocus="javascript:geolocate(autocomplete2)">
+      </div>
+		<div style="display:inline">
+		<button id="preview" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:_setEndPlace()">위치확인</button>
+      </div>
+	</td>
+</tr>
+	<tr>
+	<td rowspan=2 valign=top>
+	<div>
+	<h2>여행지</h2>
+	<input type=text id="wptid" name="wptnm" placeholder="여행지">
+	<button id='wptbtn'>추가</button>
+	<div>
+	<strong>Travel Type </strong>
+	<select id="mode" onchange="calcRoute();">
+  	<option value="DRIVING">자동차</option>
+  	<option value="WALKING">도보</option>
+  	<option value="BICYCLING">자전거</option>
+  	<option value="TRANSIT">환승</option>
+	</select>
+		<button id="seaerchRoute" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:calcRoute()">길찾기</button>
+        <input type="hidden" name="address" id="address" class="form-control" >
+        <input type="hidden" name="ctour_seq" id="ctour_seq" class="form-control" value="-1">
+	</div> 
+	<div id="accordion">
+	</div>
+	<br>
+	<div id="wpt_info">
+	</div>
+	<div>
+	총 체류일 <input type=text id="ctour_days" name="ctour_days" value='0' size=3 class="form-control" > 일
+	<br>
+	
+	<button id="btnsavemaster" class="btn btn-lg btn-primary btn-block" type="button">Submit</button>
+	<input type=button name='save db' value='save db' onclick="javascript:_getTourInfo();">
+	<input type=button name='save session' value='save session' onclick="javascript:_saveSession();">
+	</div>
+	</td>
+	<td>
+	<!--<div style='overflow:scroll; height:250px'> -->
+	<div id="searchdetail" style="overflow:scroll;align:left;height:200px"></div>
+	</div>
+	</td>
+	</tr>
+	<tr>
+	<td>
+	
+		<div id="thumbnail" style='float:left;overflow:scroll;height:100px;width:100%'>
+		</div>
+		<!-- </div> -->
+ 		
+		<div id="detailthumbnail" style="float:left;overflow:scroll;height:100px;width:100%"></div>
+		<div id="mapmain">
+			<div id="googleMap" style="width:100%;height:600px;"></div>
+			<div id="directionsPannel" style="width:30%;height:100%;"></div>
+		</div>
+<div id="layer1" class="pop-layer">
+	<div class="pop-container">
+		<div class="pop-conts">
+		<!--content //-->
+		<p id="detailpopup">
+		</p>
+ 		
+		<div class="btn-r">
+		<a href="#" class="cbtn">Close</a>
+		</div>
+		<!--// content-->
+		</div>
+	</div>
+</div>
+	</td>
+	</tr>
+	</tbody>
+	</table>
+
+    </form>
+</div>
+
+</body>
+</html>
+
+<!--
+    <div id="accordionsub">
+  		<div class="groupsub">
+    		<h4 sid="1">Strasboug, France</h4>
+			<div>test</div>
+		</div>
+  		<div class="groupsub">
+    		<h4 sid="1">Colmar, France</h4>
+			<div>test</div>
+		</div>
+  		<div class="groupsub">
+    		<h4 sid="1">Section 1.3</h4>
+			<div>test</div>
+		</div>
+    </div>
+  </div>
+  <div class="group" sid="2">
+		<h3 sid="Colmar, France">Colmar, France</h3>
+    <div id="accordionsub">
+  		<div class="groupsub">
+    		<h4 sid="1">Strasboug, France</h4>
+			<div>test</div>
+		</div>
+  		<div class="groupsub">
+    		<h4 sid="1">Colmar, France</h4>
+			<div>test</div>
+		</div>
+  		<div class="groupsub">
+    		<h4 sid="1">Section 1.3</h4>
+			<div>test</div>
+		</div>
+    </div>
+  </div>
+  <div class="group" sid="3">
+	<h3>Basel, Swiss</h3>
+    <div>
+      <p>방문지2
+      <ul>
+        <li>List item one</li>
+        <li>List item two</li>
+        <li>List item three</li>
+      </ul>
+    </div>
+-->
