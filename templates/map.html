@@ -25,6 +25,9 @@
 	.groupsub { zoom: 1 ;width:170px;background-color:#ddeedd}
 	.draggable { width: 100px; height: 10px; padding: 0.1em; float: left; margin: 1px 1px 10px       0; background-color:#AAAAAA;}
 	.droppable { width: 200px; height: 200px; padding: 0.5em; float: left; margin: 10px 10px 10px       0; background-color:#CCCCCC;}
+	#replayarea { height: 100%; float: left; white-space: nowrap; width: 240px}
+	#menuarea { height: 100%; float: left; white-space: nowrap; width: 50px}
+	#mainarea { height: 100%; float:left; white-space: nowrap; width: 1400px}
 	label {
 		display: inline-block;
 		width: 50px;
@@ -34,7 +37,6 @@
 	<script>
 
 	var directionsDisplay;
-
 	var directionsService = new google.maps.DirectionsService();
 	var src;
 	var dest;
@@ -57,6 +59,32 @@
   		country: 'long_name',
   		postal_code: 'short_name'
 	};
+	function _togglereply() {
+		areasize = document.getElementById("replyarea").offsetWidth;
+		alert(areasize);
+		if(areasize>=100)  {
+			$("#replybody").hide();
+			$("#replyarea").width(50);
+			$("#mainarea").width(1400);
+		}else{
+			$("#replybody").show();
+			$("#replyarea").width(290);
+			$("#mainarea").width(1110);
+		}
+	}
+
+	function _togglemenu() {
+		areasize = document.getElementById("menuarea").offsetWidth;
+		if(areasize>=100)  {
+			$("#menubody").hide();
+			$("#menuarea").width(50);
+			$("#mainarea").width(1400);
+		}else{
+			$("#menubody").show();
+			$("#menuarea").width(240);
+			$("#mainarea").width(1210);
+		}
+	}
 
 	function myEventHandler(e)
 	{
@@ -364,6 +392,7 @@
 		document.getElementById("ctour_days").value = ctour_master[2];
 		document.getElementById("address_start").value = ctour_master[3];
 		document.getElementById("address_end").value = ctour_master[4];
+		document.getElementById("open_yn").selectedIndex = parseInt(ctour_master[5]);
 
 		wptcnt = ctour_wpt.length;
 		if(wptcnt>0) {
@@ -433,6 +462,9 @@
 		dataarr = [];
 		datawptarr = [];
 		idx = 1;
+
+		o = document.getElementById("open_yn");
+		open_yn = o.options[o.selectedIndex].value;
 
 		note = document.getElementsByName("wp_note");
 		cost = document.getElementsByName("wp_cost");
@@ -513,6 +545,7 @@
 
 		var master = {ctour_seq:document.getElementById("ctour_seq").value,
 						ctour_title:document.getElementById("ctour_title").value,
+						open_yn:open_yn,
 						ctour_days:document.getElementById("ctour_days").value,
 						address_start:document.getElementById("address_start").value,
 						address_end:document.getElementById("address_end").value,
@@ -1068,7 +1101,16 @@
 	</script>
 </head>
 <body>
-<div>
+<div id=menuarea style="width:50px;float:left">
+	<div id=menuicon><img src="/static/image/menu.png" onclick="javascript:_togglemenu()"/></div>
+	<div id=menubody style="display:none">
+	<h2>MENU 1</h2>
+	<h2>MENU 2</h2>
+	<h2>MENU 3</h2>
+	<h2>MENU 4</h2>
+	</div>
+</div>
+<div id=mainarea >
 	<table width=100% height=100% border=1>
 	<tbody>
 	<tr>
@@ -1098,7 +1140,7 @@
 		<button id='init' onclick="javascript:initwaypoints();initcTourInfo();_saveSession()">신규</button>
 		</div>
 		<div>공개여부
-		<select name="openyn" id="openyn">
+		<select name="open_yn" id="open_yn">
 		<option value="Y">공개</option>
 		<option value="N">비공개</option>
 		</select>
@@ -1144,6 +1186,10 @@
 </tr>
 	<tr>
 	<td rowspan=2 valign=top>
+	<div>
+	<h2>소개</h2>
+	 <textarea id="ctour_desc" name="ctour_desc" placeholder="소개내용" rows=3 cols=30></textarea>
+	</div>
 	<div>
 	<h2>여행지</h2>
 	<input type=text id="wptid" name="wptnm" placeholder="여행지">
@@ -1210,8 +1256,14 @@
 	</tr>
 	</tbody>
 	</table>
-
     </form>
+</div>
+ <div id=replyarea onclick="javascript:_togglereply()" style="width:240px; float:left">
+<div><img src="/static/image/menu.png" onclick="javascript:_togglereplay()"/><div>
+<div id=replybody>
+	<div><h5 id=tour_title>tour_title</h5></div>
+	<div><h5 id=tour_comment>tour_comment</h5></div>
+</div>
 </div>
 
 </body>
@@ -1258,7 +1310,6 @@
         <li>List item one</li>
         <li>List item two</li>
         <li>List item three</li>
-      </ul>
       </ul>
     </div>
 -->
