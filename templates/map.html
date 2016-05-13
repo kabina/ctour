@@ -61,7 +61,6 @@
 	};
 	function _togglereply() {
 		areasize = document.getElementById("replyarea").offsetWidth;
-		alert(areasize);
 		if(areasize>=100)  {
 			$("#replybody").hide();
 			$("#replyarea").width(50);
@@ -165,7 +164,6 @@
 				}
 			});
 			$("h3").unbind("click").bind("click",function() {
-			alert("CMENU:"+cmenu);
       				//cmenu = $('h3').index(this);
 				//console.log("=======================");
 				//console.log(cmenu);
@@ -393,6 +391,7 @@
 		document.getElementById("address_start").value = ctour_master[3];
 		document.getElementById("address_end").value = ctour_master[4];
 		document.getElementById("open_yn").selectedIndex = parseInt(ctour_master[5]);
+		document.getElementById("ctour_desc").value = ctour_master[6];
 
 		wptcnt = ctour_wpt.length;
 		if(wptcnt>0) {
@@ -464,7 +463,7 @@
 		idx = 1;
 
 		o = document.getElementById("open_yn");
-		open_yn = o.options[o.selectedIndex].value;
+		open_yn = o.selectedIndex;
 
 		note = document.getElementsByName("wp_note");
 		cost = document.getElementsByName("wp_cost");
@@ -472,7 +471,7 @@
 
 		$("h3").each(function() {
       		cmenu = $('.group').index(this);
-			alert("CMENU:"+cmenu);
+			alert("CMENU:"+this.title);
 		
 			dataarr.push({
 				index: idx,
@@ -547,6 +546,7 @@
 						ctour_title:document.getElementById("ctour_title").value,
 						open_yn:open_yn,
 						ctour_days:document.getElementById("ctour_days").value,
+						ctour_desc:document.getElementById("ctour_desc").value,
 						address_start:document.getElementById("address_start").value,
 						address_end:document.getElementById("address_end").value,
 						waypoints:dataarr, places:datawptarr}

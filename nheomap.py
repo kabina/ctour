@@ -32,19 +32,12 @@ def home():
 
 @app.route('/gettourinfo', methods=['POST','GET'])
 def gettourinfo():
-<<<<<<< HEAD
-	try:
-		#conn = mdb.connect('localhost', 'kabina', 'ah64jj3!', 'CTOUR')
-		conn = mdb.connect(user='kabina', password='ah64jj3!', host='127.0.0.1', database='CTOUR')
-		#conn = mdb.connect(user='kabina', passwd='ah64jj3!', port=3306, host='127.0.0.1', db='CTOUR')
-=======
 	global conn
 	try:
 		#conn = mdb.connect('localhost', 'kabina', 'ah64jj3!', 'CTOUR')
 		print "It's Test"
 		conn = mdb.connect(user='kabina', password='ah64jj3!', host='127.0.0.1', database='CTOUR')
 		#conn = mdb.connect(user='root', passwd='ah64jj3!', port=3306, host='127.0.0.1', db='CTOUR')
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 
 		# read the posted values from the UI
 		uid = session.get("id")
@@ -52,7 +45,7 @@ def gettourinfo():
 		ctour_seq = request.json['ctour_seq']
 		print "______"+ctour_seq
 
-		query = ("select ctour_seq, ctour_title, ctour_days, ctour_start_place, ctour_end_place from ctour_master where ctour_seq = %s")
+		query = ("select ctour_seq, ctour_title, ctour_days, ctour_start_place, ctour_end_place, open_yn, ctour_desc from ctour_master where ctour_seq = %s")
 		querywpt = ("select ctour_seq, wpt_seq, wpt_name, nights, addr, note, cost, distance from ctour_wpt where ctour_seq = %s")
 		queryplace = ("select ctour_seq, wpt_seq, place_seq, place_id, place_name, place_addr, place_note, place_cost, place_routeyn, place_routeinfo from ctour_wptplace where ctour_seq = %s")
 
@@ -64,7 +57,7 @@ def gettourinfo():
 		cursor.execute(query, [ctour_seq])
 		ctour_master = cursor.fetchall()
 		if len(ctour_master) == 0:
-			ctour_master = [[-1,'','','','','']]
+			ctour_master = [[-1,'','','','','','','']]
 
 		cursor.execute(querywpt, [str(ctour_seq)])
 		ctour_wpt = cursor.fetchall()
@@ -83,15 +76,9 @@ def gettourinfo():
 
 	except Exception as e:
 		return json.dumps({'error':str(e)})
-<<<<<<< HEAD
-	finally:
-		if conn:
-			conn.close()
-=======
 	#finally:
 		##if conn:
 		#conn.close()
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 	
 
 
@@ -125,15 +112,9 @@ def tour():
 
 	except Exception as e:
 		return json.dumps({'error':str(e)})
-<<<<<<< HEAD
-	finally:
-		if conn:
-			conn.close()
-=======
 	#finally:
 	#if conn:
 	#	conn.close()
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 	
 	return render_template('map.html', ctour_list=ctour_list)
 
@@ -158,13 +139,15 @@ def signUp():
 		ctour_seq = tourdata["ctour_seq"]
 		ctour_title = tourdata["ctour_title"]
 		ctour_days = tourdata["ctour_days"]
+		open_yn = tourdata["open_yn"]
+		ctour_desc = tourdata["ctour_desc"]
 		ctour_end_place = tourdata["address_end"]
 		ctour_start_place = tourdata["address_start"]
 		waypoints = tourdata["waypoints"]
 		places = tourdata["places"]
 		user_id = session.get("id")
 		print "======================================"
-		print places
+		print ctour_desc
 		print "======================================"
 		print len(ctour_seq)
 
@@ -183,14 +166,15 @@ def signUp():
 			#with closing(mysql.connect()) as conn:
 				#with closing(conn.cursor()) as cursor:
 			cursor = conn.cursor()
-			result = cursor.callproc('sp_isTour', (itour_seq, ctour_title, ctour_days, ctour_start_place, ctour_end_place, user_id,new_seq))
+			result = cursor.callproc('sp_isTour', (itour_seq, ctour_title, ctour_days, ctour_start_place, ctour_end_place, user_id, open_yn, ctour_desc, new_seq))
 			print "result"
 			print result
 	
-			print "new_seq"+str(result[6])
-			new_seq = str(result[6])
+			print "new_seq"+str(result[8])
+			new_seq = str(result[8])
 	
 			for wpt in waypoints :
+                                print "========================"
 				wpt_index = wpt["index"]
 				wpt_name = wpt["wptnm"]
 				nights = wpt["nights"]
@@ -198,8 +182,17 @@ def signUp():
 				note = wpt["note"]
 				cost = wpt["cost"]
 				distance = wpt["distance"]
-				print wpt_index, wpt_name
+                                print "========================"
+                                print wpt_index
+                                print wpt["wptnm"]
+                                print nights
+                                print addr
+				print note
+				print cost
+				print distance
+				wpt_index = wpt["index"]
 				cursor.callproc('sp_isTourWpt', (new_seq, wpt_index, wpt_name, nights, addr, note, cost, distance))
+                                print "========================"
 			for place in places :
 				index = place["index"]
 				place_seq = place["place_seq"]
@@ -225,8 +218,8 @@ def signUp():
 	except Exception as e:
 		if conn:
 			conn.rollback()
-		print str(e)
-		return json.dumps({'error':str(e)})
+			print str(e)
+			return json.dumps({'error':str(e)})
 	finally:
 		if conn:
 			conn.close()
@@ -235,8 +228,4 @@ if __name__ == '__main__':
 	app.config['SESSION_TYPE'] = 'memcached'
 	app.config['SECRET_KEY'] = 'super secret key'
 	app.debug=True
-<<<<<<< HEAD
-	app.run(host='192.168.0.142')
-=======
 	app.run(host='192.168.0.144', port=5000)
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
