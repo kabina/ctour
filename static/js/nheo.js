@@ -54,9 +54,14 @@ $(function(){
 			success: function(response){
 				console.log(response);
 				ctour_master = response["ctour_master"];
-				alert("저장되었습니다.[ctour_seq:"+ctour_master[6]+"]");
-				document.getElementById("ctour_seq").value = ctour_master[6];
-				_saveSession();
+				console.log(response);
+				if(ctour_master) {
+					alert("저장되었습니다.[ctour_seq:"+ctour_master[6]+"]");
+					document.getElementById("ctour_seq").value = ctour_master[6];
+					_saveSession();
+				}else{
+					alert("오류가발생했습니다. "+ response["error"]);
+				}
 				//procMapControl(response);
 			},
 			error: function(error){
@@ -77,12 +82,8 @@ $(function(){
 
 	$('#wptbtn').click(function() {
 		wptcnt++;
-<<<<<<< HEAD
 		console.log("wptcnt:"+wptcnt);
 		var toAdd = "<div class=\"group\"><h3 title='"+$("input[name=wptnm]").val()+"' id='0' data-addr='"+$("input[name=wptnm]").val()+"''>0일 "+$("input[name=wptnm]").val()+"</h3><div style='height:100px;' class=accordionsub><table><tr><td>체류:<input type=text name=wp_nights class=wp_nights value='0' size=2 onchange=\"javascript:_changenights("+(wptcnt)+")\">박</td><td>"+ 
-=======
-		var toAdd = "<div class=\"group\"><h3 title='"+$("input[name=wptnm]").val()+"' id='0' data-addr='"+$("input[name=wptnm]").val()+"''>0일 "+$("input[name=wptnm]").val()+"</h3><div style='height:100px;' class=accordionsub><table><tr><td>체류:<input type=text id=wp_nights value='0' size=2 onchange=\"javascript:_changenights("+(wptcnt)+")\">박</td><td>"+ 
->>>>>>> 937d7c1a0b2b5dca9996bdc8da27b16276d6e183
 " 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
 "<input type=button id="+(wptcnt)+" name=innerroute class=stroll value='동선' onclick='javascript:stroll()'></td></tr><tr><td colspan=2>거리:<input type=text name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type id=wp_note name=wp_note value='' size=20></td></tr><tr><td colspan=2><input type=text name=wp_cost id=wp_cost size=10/></td></tr></table></div></div>";
 		$("#accordion").append(toAdd);
@@ -144,4 +145,5 @@ $(function(){
 	});
 
 	$("#accordiaon").accordion();
+
 });
