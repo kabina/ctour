@@ -28,7 +28,7 @@
 
 	.container
 	{
-    	width: 1490;
+    	width: 1550;
     	overflow-x: scroll;
 	}
 	#replyarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 300px;}
@@ -67,27 +67,35 @@
 	};
 	function _togglereply() {
 		areasize = document.getElementById("replyarea").offsetWidth;
+		mainsize = $("#mainarea").width();
+		replymax = 300;
+		replymin = 35;
 		if(areasize>=100)  {
 			$("#replybody").hide();
-			$("#replyarea").width(50);
-			$("#mainarea").width(1500);
+			$("#reply").hide();
+			$("#replyarea").width(replymin);
+			$("#mainarea").width(mainsize+(replymax-replymin));
 		}else{
 			$("#replybody").show();
-			$("#replyarea").width(300);
-			$("#mainarea").width(1200);
+			$("#reply").show();
+			$("#replyarea").width(replymax);
+			$("#mainarea").width(mainsize-(replymax-replymin));
 		}
 	}
 
 	function _togglemenu() {
 		areasize = document.getElementById("menuarea").offsetWidth;
+		mainsize = $("#mainarea").width();
+		menumax = 200;
+		menumin = 35;
 		if(areasize>=100)  {
 			$("#menubody").hide();
-			$("#menuarea").width(50);
-			$("#mainarea").width(1500);
+			$("#menuarea").width(menumin);
+			$("#mainarea").width(mainsize+(menumax-menumin));
 		}else{
 			$("#menubody").show();
-			$("#menuarea").width(300);
-			$("#mainarea").width(1200);
+			$("#menuarea").width(menumax);
+			$("#mainarea").width(mainsize-(menumax-menumin));
 		}
 	}
 
@@ -529,6 +537,7 @@
 		note = document.getElementsByName("wp_note");
 		cost = document.getElementsByName("wp_cost");
 		distance = document.getElementsByName("wp_distance");
+		nights = document.getElementsByName("wp_nights");
 
 		$("h3").each(function() {
       		cmenu = $('.group').index(this);
@@ -537,7 +546,7 @@
 			dataarr.push({
 				index: idx,
 				wptnm: this.title,
-				nights: this.id,
+				nights: nights[idx-1].value,
 				addr: this.getAttribute("data-addr"),
 				note: note[idx-1].value,
 				cost: cost[idx-1].value,
@@ -1324,7 +1333,7 @@
 		<div><img src="/static/image/menu.png" onclick="javascript:_togglereply()"/><div>
 		<div id=replybody>
 		</div>
-		<div style="valign:top">Re<textarea id=replytext rows=3 cols=30></textarea> <input type=button onclick="javascript:_reply()" value="등록"/></div>
+		<div style="valign:top" id=reply >Re<textarea id=replytext rows=3 cols=30></textarea> <input type=button onclick="javascript:_reply()" value="등록"/></div>
 	</div>
 </div>
 

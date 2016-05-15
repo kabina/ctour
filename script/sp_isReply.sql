@@ -11,7 +11,7 @@ DECLARE vseq INT ;
 
 IF exists (select reply_seq from CTOUR.ctour_reply where ctour_seq = ictour_seq and reply_seq = ireply_seq)
 Then
-  update CTOUR.ctour_reply set reply_text = ireply_text where ctour_seq=ictour_seq and reply_seq = ireply_seq;
+  update CTOUR.ctour_reply set reply_text = ireply_text, updt_dt = now() where ctour_seq=ictour_seq and reply_seq = ireply_seq;
   SET o_val  = ireply_seq;
 else
 	if not exists(select reply_seq  from CTOUR.ctour_reply where ctour_seq = ictour_seq)
@@ -23,8 +23,8 @@ else
 
 	SET o_val = vseq;
     
-    insert into CTOUR.ctour_reply(ctour_seq, reply_seq, rreply_seq, reply_text, user_id) 
-    values(ictour_seq, vseq, irreply_seq, ireply_text, iuser_id);
+    insert into CTOUR.ctour_reply(ctour_seq, reply_seq, rreply_seq, reply_text, user_id, regr_dt) 
+    values(ictour_seq, vseq, irreply_seq, ireply_text, iuser_id, now());
 END IF;
 
 SELECT @o_val;
