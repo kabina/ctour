@@ -28,10 +28,10 @@
 
 	.container
 	{
-    	width: 1500px;
+    	width: 1490;
     	overflow-x: scroll;
 	}
-	#replyarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 240px;}
+	#replyarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 300px;}
 	#menuarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 50px;}
 	#mainarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 1200px;}
 	label {
@@ -70,11 +70,11 @@
 		if(areasize>=100)  {
 			$("#replybody").hide();
 			$("#replyarea").width(50);
-			$("#mainarea").width(1200);
+			$("#mainarea").width(1500);
 		}else{
 			$("#replybody").show();
-			$("#replyarea").width(290);
-			$("#mainarea").width(900);
+			$("#replyarea").width(300);
+			$("#mainarea").width(1200);
 		}
 	}
 
@@ -83,11 +83,11 @@
 		if(areasize>=100)  {
 			$("#menubody").hide();
 			$("#menuarea").width(50);
-			$("#mainarea").width(1200);
+			$("#mainarea").width(1500);
 		}else{
 			$("#menubody").show();
-			$("#menuarea").width(240);
-			$("#mainarea").width(900);
+			$("#menuarea").width(300);
+			$("#mainarea").width(1200);
 		}
 	}
 
@@ -389,7 +389,7 @@
 		else obj.value='1'
 	}
 		//$(select).eq(cmenu).find(".groupsub > h4").each(function() {
-	function _loadTourDetail(ctour_master, ctour_wpt, ctour_place) {
+	function _loadTourDetail(ctour_master, ctour_wpt, ctour_place, ctour_reply) {
 
 		document.getElementById("ctour_seq").value =  ctour_master[0];
 		document.getElementById("ctour_title").value = ctour_master[1];
@@ -461,6 +461,61 @@
 		//$(".accordionsub").sortable().accordion("refresh");
 
 		_initDroppable();
+
+		_printreply(ctour_reply);
+	}
+
+	function _printreply(ctour_reply) {
+
+		$(".reply").remove();
+
+		idx = 0;
+		replylength = ctour_reply.length;
+		
+		for(idx = 0 ; idx < replylength; idx++) {
+			$("#replybody").append("<div class='reply'>"+ctour_reply[idx][3]+" -- "+ctour_reply[idx][4]+" <a href='javascript:rreply("+ctour_reply[idx][0]+", "+ctour_reply[idx][1]+")'>Re</a></div>");
+		}
+		
+		
+	}
+
+	function _reply(){
+		$.ajax({
+			//url: 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyA6Ru1bMnTyQ1hesbxnucSjmP4Im30RE',
+			url: '/savereply',
+			//data: $('.form-map').serialize(),
+			data:JSON.stringify({reply:_getreply()}),
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			type: 'POST',
+			success: function(response){
+				console.log(response);
+				ctour_reply = response["ctour_reply"];
+				if(ctour_reply) {
+					alert("저장되었습니다.");
+					_printreply(ctour_reply)
+				}else{
+					alert("오류가발생했습니다. "+ response["error"]);
+				}
+				//procMapControl(response);
+			},
+			error: function(error){
+				console.log(error);
+			}
+		});
+	}
+
+	function _getreply() {
+			reply = [];
+			ictour_seq = $("#ctour_seq").val();
+			reply.push({
+				ctour_seq: ictour_seq,
+				reply_seq: -1,
+				rreply_seq: 0,
+				reply_text: $("#replytext").val()
+			});
+			console.log(reply);
+			return reply;
 	}
 
 	function _getTourInfo() {
@@ -477,7 +532,7 @@
 
 		$("h3").each(function() {
       		cmenu = $('.group').index(this);
-			alert("CMENU:"+this.title);
+			//alert("CMENU:"+this.title);
 		
 			dataarr.push({
 				index: idx,
@@ -1268,9 +1323,8 @@
 	<div id=replyarea >
 		<div><img src="/static/image/menu.png" onclick="javascript:_togglereply()"/><div>
 		<div id=replybody>
-			<div><h5 id=tour_title>tour_title</h5></div>
-			<div><h5 id=tour_comment>tour_comment</h5></div>
 		</div>
+		<div style="valign:top">Re<textarea id=replytext rows=3 cols=30></textarea> <input type=button onclick="javascript:_reply()" value="등록"/></div>
 	</div>
 </div>
 

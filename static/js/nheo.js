@@ -33,7 +33,7 @@ $(function(){
 			success: function(response){
 				ctour = response["ctour"];
 				console.log(response);
-				_loadTourDetail(ctour["ctour_master"][0], ctour["ctour_wpt"], ctour["ctour_place"])
+				_loadTourDetail(ctour["ctour_master"][0], ctour["ctour_wpt"], ctour["ctour_place"], ctour["ctour_reply"])
 				//procMapControl(response);
 			},
 			error: function(error){
@@ -41,6 +41,33 @@ $(function(){
 			}
 		});
 	});
+/*
+	function _reply(){
+		$.ajax({
+			//url: 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyA6Ru1bMnTyQ1hesbxnucSjmP4Im30RE',
+			url: '/savereply',
+			//data: $('.form-map').serialize(),
+			data:JSON.stringify({reply:_getreply()}),
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			type: 'POST',
+			success: function(response){
+				console.log(response);
+				ctour_reply = response["ctour_reply"];
+				if(ctour_reply) {
+					alert("저장되었습니다.");
+					_printreply(ctour_reply)
+				}else{
+					alert("오류가발생했습니다. "+ response["error"]);
+				}
+				//procMapControl(response);
+			},
+			error: function(error){
+				console.log(error);
+			}
+		});
+	}
+*/
 
 	$('#btnsavemaster').click(function(){
 		$.ajax({

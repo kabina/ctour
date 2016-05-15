@@ -48,6 +48,7 @@ def gettourinfo():
 		query = ("select ctour_seq, ctour_title, ctour_days, ctour_start_place, ctour_end_place, open_yn, ctour_desc from ctour_master where ctour_seq = %s")
 		querywpt = ("select ctour_seq, wpt_seq, wpt_name, nights, addr, note, cost, distance from ctour_wpt where ctour_seq = %s")
 		queryplace = ("select ctour_seq, wpt_seq, place_seq, place_id, place_name, place_addr, place_note, place_cost, place_routeyn, place_routeinfo from ctour_wptplace where ctour_seq = %s")
+		queryreply = ("select ctour_seq, reply_seq, rreply_seq, reply_text, user_id from ctour_reply where ctour_seq = %s")
 
 
 		
@@ -65,9 +66,15 @@ def gettourinfo():
 		cursor.execute(queryplace, [str(ctour_seq)])
 		ctour_place = cursor.fetchall()
 
-		data.update({'ctour_master':ctour_master, 'ctour_wpt':ctour_wpt, 'ctour_place':ctour_place})
+		cursor.execute(queryreply, [str(ctour_seq)])
+		ctour_reply = cursor.fetchall()
+
+		data.update({'ctour_master':ctour_master, 'ctour_wpt':ctour_wpt, 'ctour_place':ctour_place, 'ctour_reply':ctour_reply})
 		print "+===================================="
-		print ctour_master, ctour_wpt, ctour_place
+		print ctour_master, ctour_wpt, ctour_place, ctour_reply
+		print "+===================================="
+		print ctour_reply
+		print "+===================================="
 	
 		if data :
 				return json.dumps({'message':'tour info retrieved successfully !', 'ctour':data})
@@ -219,6 +226,43 @@ def signUp():
 		if conn:
 			conn.rollback()
 			print str(e)
+			return json.dumps({'error':str(e)})
+	finally:
+		if conn:
+			conn.close()
+
+@app.route('/savereply',methods=['POST', 'GET'])
+def savereply():
+	try:
+		conn = mdb.connect(user='kabina', password='ah64jj3!', host='192.168.0.144', database='CTOUR')
+ 
+		# read the posted values from the UI
+		data = {}
+		ctour_reply = request.json['reply'][0]
+		ctour_seq = ctour_reply["ctour_seq"]
+		reply_seq = ctour_reply["reply_seq"]
+		rreply_seq = ctour_reply["rreply_seq"]
+		reply_text = ctour_reply["reply_text"]
+		user_id = session.get("id")
+
+
+                queryreply = "select ctour_seq, reply_seq, rreply_seq, reply_text, user_id from ctour_reply where ctour_seq = %s";
+
+                newseq = -1;
+		cursor = conn.cursor()
+		result = cursor.callproc('sp_isReply', (ctour_seq, reply_seq, rreply_seq, reply_text, user_id, newseq))
+
+		cursor.execute(queryreply, [str(ctour_seq)])
+		ctour_reply = cursor.fetchall()
+
+		data.update({'ctour_reply':ctour_reply})
+	
+		conn.commit()
+		return json.dumps({'message':'tour reply fetched successfully !', 'ctour_reply':ctour_reply})
+
+	except Exception as e:
+		if conn:
+			conn.rollback()
 			return json.dumps({'error':str(e)})
 	finally:
 		if conn:
