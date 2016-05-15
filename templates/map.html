@@ -25,9 +25,15 @@
 	.groupsub { zoom: 1 ;width:170px;background-color:#ddeedd}
 	.draggable { width: 100px; height: 10px; padding: 0.1em; float: left; margin: 1px 1px 10px       0; background-color:#AAAAAA;}
 	.droppable { width: 200px; height: 200px; padding: 0.5em; float: left; margin: 10px 10px 10px       0; background-color:#CCCCCC;}
-	#replayarea { height: 100%; float: left; white-space: nowrap; width: 240px}
-	#menuarea { height: 100%; float: left; white-space: nowrap; width: 50px}
-	#mainarea { height: 100%; float:left; white-space: nowrap; width: 1400px}
+
+	.container
+	{
+    	width: 1500px;
+    	overflow-x: scroll;
+	}
+	#replyarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 240px;}
+	#menuarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 50px;}
+	#mainarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 1200px;}
 	label {
 		display: inline-block;
 		width: 50px;
@@ -64,11 +70,11 @@
 		if(areasize>=100)  {
 			$("#replybody").hide();
 			$("#replyarea").width(50);
-			$("#mainarea").width(1400);
+			$("#mainarea").width(1200);
 		}else{
 			$("#replybody").show();
 			$("#replyarea").width(290);
-			$("#mainarea").width(1110);
+			$("#mainarea").width(900);
 		}
 	}
 
@@ -77,11 +83,11 @@
 		if(areasize>=100)  {
 			$("#menubody").hide();
 			$("#menuarea").width(50);
-			$("#mainarea").width(1400);
+			$("#mainarea").width(1200);
 		}else{
 			$("#menubody").show();
 			$("#menuarea").width(240);
-			$("#mainarea").width(1210);
+			$("#mainarea").width(900);
 		}
 	}
 
@@ -1101,7 +1107,8 @@
 	</script>
 </head>
 <body>
-<div id=menuarea style="width:50px;float:left">
+<div class="container">
+<div id=menuarea >
 	<div id=menuicon><img src="/static/image/menu.png" onclick="javascript:_togglemenu()"/></div>
 	<div id=menubody style="display:none">
 	<h2>MENU 1</h2>
@@ -1258,12 +1265,13 @@
 	</table>
     </form>
 </div>
- <div id=replyarea onclick="javascript:_togglereply()" style="width:240px; float:left">
-<div><img src="/static/image/menu.png" onclick="javascript:_togglereplay()"/><div>
-<div id=replybody>
-	<div><h5 id=tour_title>tour_title</h5></div>
-	<div><h5 id=tour_comment>tour_comment</h5></div>
-</div>
+	<div id=replyarea >
+		<div><img src="/static/image/menu.png" onclick="javascript:_togglereply()"/><div>
+		<div id=replybody>
+			<div><h5 id=tour_title>tour_title</h5></div>
+			<div><h5 id=tour_comment>tour_comment</h5></div>
+		</div>
+	</div>
 </div>
 
 </body>

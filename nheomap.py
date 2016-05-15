@@ -36,7 +36,7 @@ def gettourinfo():
 	try:
 		#conn = mdb.connect('localhost', 'kabina', 'ah64jj3!', 'CTOUR')
 		print "It's Test"
-		conn = mdb.connect(user='kabina', password='ah64jj3!', host='127.0.0.1', database='CTOUR')
+		conn = mdb.connect(user='kabina', password='ah64jj3!', host='192.168.0.144', database='CTOUR')
 		#conn = mdb.connect(user='root', passwd='ah64jj3!', port=3306, host='127.0.0.1', db='CTOUR')
 
 		# read the posted values from the UI
@@ -86,7 +86,7 @@ def gettourinfo():
 def tour():
 	try:
 		#conn = mdb.connect('localhost', 'kabina', 'ah64jj3!', 'CTOUR')
-		conn = mdb.connect(user='kabina', password='ah64jj3!', host='127.0.0.1', database='CTOUR')
+		conn = mdb.connect(user='kabina', password='ah64jj3!', host='192.168.0.144', database='CTOUR')
 		#conn = mdb.connect(user='kabina', passwd='ah64jj3!', port=3306, host='127.0.0.1', db='CTOUR')
 
 		session['id'] = request.args.get('email')
@@ -131,7 +131,7 @@ def signUp():
 	try:
 		#conn = mdb.connect('localhost', 'kabina', 'ah64jj3!', 'CTOUR')
 		#conn = mdb.connect(user='kabina', passwd='ah64jj3!', port=3306, host='127.0.0.1', db='CTOUR' )
-		conn = mdb.connect(user='kabina', password='ah64jj3!', host='127.0.0.1', database='CTOUR')
+		conn = mdb.connect(user='kabina', password='ah64jj3!', host='192.168.0.144', database='CTOUR')
  
 		# read the posted values from the UI
 		tourdata = request.json['tourdata']
@@ -228,4 +228,4 @@ if __name__ == '__main__':
 	app.config['SESSION_TYPE'] = 'memcached'
 	app.config['SECRET_KEY'] = 'super secret key'
 	app.debug=True
-	app.run(host='192.168.0.144', port=5000)
+	app.run(host='192.168.0.142', port=5000)
