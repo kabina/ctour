@@ -39,6 +39,8 @@
 		width: 50px;
 		text-align: right;
 	}
+	.reply { width:300; border:1px solid c3c3c3; padding:10px; background-color:#dddddd; word-break:break-all;}
+
 	</style>
 	<script>
 
@@ -481,7 +483,7 @@
 		replylength = ctour_reply.length;
 		
 		for(idx = 0 ; idx < replylength; idx++) {
-			$("#replybody").append("<div class='reply'>"+ctour_reply[idx][3]+" -- "+ctour_reply[idx][4]+" <a href='javascript:rreply("+ctour_reply[idx][0]+", "+ctour_reply[idx][1]+")'>Re</a></div>");
+			$("#replybody").append("<div class=reply >"+ctour_reply[idx][3]+" -- "+ctour_reply[idx][5]+"-"+ctour_reply[idx][4]+" <a href='javascript:rreply("+ctour_reply[idx][0]+", "+ctour_reply[idx][1]+")'>Re</a></div>");
 		}
 		
 		
@@ -500,6 +502,7 @@
 				console.log(response);
 				ctour_reply = response["ctour_reply"];
 				if(ctour_reply) {
+					document.getElementById("replytext").value = "";
 					alert("저장되었습니다.");
 					_printreply(ctour_reply)
 				}else{
@@ -1333,7 +1336,7 @@
 		<div><img src="/static/image/menu.png" onclick="javascript:_togglereply()"/><div>
 		<div id=replybody>
 		</div>
-		<div style="valign:top" id=reply >Re<textarea id=replytext rows=3 cols=30></textarea> <input type=button onclick="javascript:_reply()" value="등록"/></div>
+		<div style="valign:top" id=replyregr >Re<textarea id=replytext rows=3 cols=30></textarea> <input type=button onclick="javascript:_reply()" value="등록"/></div>
 	</div>
 </div>
 

@@ -26,6 +26,11 @@
       </div>
 -->
     </div>
+<form id=login name=login action="/login" method="post">
+<input type=hidden name=email id=email>
+<input type=hidden name=name id=name>
+<input type=hidden name=pic id=pic>
+</form>
  </body>
 
   <script>
@@ -55,11 +60,17 @@
 
 	console.log(resp);
     for (var i=0; i < resp.emails.length; i++) {
-      if (resp.emails[i].type === 'account') email = resp.emails[i].value;
+      if (resp.emails[i].type === 'account') {
+		email = resp.emails[i].value;
+		document.getElementById("email").value = email;
+	}
     }
 	pic = resp.image.url;
+	document.getElementById("pic").value = pic;
 	name = resp.displayName;
-	location.href = "/login?email="+email+"&name="+name+"&pic="+pic;
+	document.getElementById("name").value = name;
+	document.getElementById("login").submit();
+	//location.href = "/login?email="+email+"&name="+name+"&pic="+pic;
 
     //document.getElementById('responseContainer').value = 'Primary email: ' +
     //    primaryEmail + '\n\nFull Response:\n' + JSON.stringify(resp);

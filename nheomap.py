@@ -48,7 +48,7 @@ def gettourinfo():
 		query = ("select ctour_seq, ctour_title, ctour_days, ctour_start_place, ctour_end_place, open_yn, ctour_desc from ctour_master where ctour_seq = %s")
 		querywpt = ("select ctour_seq, wpt_seq, wpt_name, nights, addr, note, cost, distance from ctour_wpt where ctour_seq = %s")
 		queryplace = ("select ctour_seq, wpt_seq, place_seq, place_id, place_name, place_addr, place_note, place_cost, place_routeyn, place_routeinfo from ctour_wptplace where ctour_seq = %s")
-		queryreply = ("select ctour_seq, reply_seq, rreply_seq, reply_text, user_id from ctour_reply where ctour_seq = %s")
+		queryreply = ("select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, regr_dt, updt_dt from ctour_reply where ctour_seq = %s")
 
 
 		
@@ -89,16 +89,16 @@ def gettourinfo():
 	
 
 
-@app.route('/login', methods=['POST','GET'])
+@app.route('/login', methods=['POST'])
 def tour():
 	try:
 		#conn = mdb.connect('localhost', 'kabina', 'ah64jj3!', 'CTOUR')
 		conn = mdb.connect(user='kabina', password='ah64jj3!', host='192.168.0.144', database='CTOUR')
 		#conn = mdb.connect(user='kabina', passwd='ah64jj3!', port=3306, host='127.0.0.1', db='CTOUR')
 
-		session['id'] = request.args.get('email')
-		session['name'] = request.args.get('name')
-		session['pic'] = request.args.get('pic')
+		session['id'] = request.form.get('email')
+		session['name'] = request.form.get('name')
+		session['pic'] = request.form.get('pic')
 
 		uid = session.get("id")
 		query = ("select ctour_seq, ctour_title from ctour_master where user_id = %s")
@@ -110,7 +110,6 @@ def tour():
 		cursor.execute(query, [uid])
 		ctour_list = cursor.fetchall()
 
-		print ctour_list
 	
 		#if ctour_list :
 				#return json.dumps({'message':'tour info retrieved successfully !', 'ctour_list':ctour_list})
@@ -246,7 +245,7 @@ def savereply():
 		user_id = session.get("id")
 
 
-                queryreply = "select ctour_seq, reply_seq, rreply_seq, reply_text, user_id from ctour_reply where ctour_seq = %s";
+                queryreply = "select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, regr_dt, updt_dt from ctour_reply where ctour_seq = %s";
 
                 newseq = -1;
 		cursor = conn.cursor()
@@ -272,4 +271,4 @@ if __name__ == '__main__':
 	app.config['SESSION_TYPE'] = 'memcached'
 	app.config['SECRET_KEY'] = 'super secret key'
 	app.debug=True
-	app.run(host='192.168.0.142', port=5000)
+	app.run(host='192.168.0.144', port=5000)
