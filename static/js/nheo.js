@@ -110,7 +110,7 @@ $(function(){
 	$('#wptbtn').click(function() {
 		wptcnt++;
 		console.log("wptcnt:"+wptcnt);
-		var toAdd = "<div class=\"group\"><h3 title='"+$("input[name=wptnm]").val()+"' id='0' data-addr='"+$("input[name=wptnm]").val()+"''>0일 "+$("input[name=wptnm]").val()+"</h3><div style='height:100px;' class=accordionsub><table><tr><td>체류:<input type=text name=wp_nights class=wp_nights value='0' size=2 onchange=\"javascript:_changenights("+(wptcnt)+")\">박</td><td>"+ 
+		var toAdd = "<div class=\"group\"><h3 title='"+$("input[name=wptnm]").val()+"' id='0' data-addr='"+$("input[name=wptnm]").val()+"''>0일 "+$("input[name=wptnm]").val()+"</h3><div style='height:100px;' class=accordionsub><table><tr><td>체류:<input type=text name=wp_nights class=wp_nights value='0' size=2 onchange=\"javascript:_changenights()\">박</td><td>"+ 
 " 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
 "<input type=button id="+(wptcnt)+" name=innerroute class=stroll value='동선' onclick='javascript:stroll()'></td></tr><tr><td colspan=2>거리:<input type=text name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type id=wp_note name=wp_note value='' size=20></td></tr><tr><td colspan=2><input type=text name=wp_cost id=wp_cost size=10/></td></tr></table></div></div>";
 		$("#accordion").append(toAdd);

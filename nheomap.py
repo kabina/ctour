@@ -45,10 +45,10 @@ def gettourinfo():
 		ctour_seq = request.json['ctour_seq']
 		print "______"+ctour_seq
 
-		query = ("select ctour_seq, ctour_title, ctour_days, ctour_start_place, ctour_end_place, open_yn, ctour_desc from ctour_master where ctour_seq = %s")
+		query = ("select ctour_seq, ctour_title, ctour_days, ctour_start_place, ctour_date_start, open_yn, ctour_desc from ctour_master where ctour_seq = %s")
 		querywpt = ("select ctour_seq, wpt_seq, wpt_name, nights, addr, note, cost, distance from ctour_wpt where ctour_seq = %s")
 		queryplace = ("select ctour_seq, wpt_seq, place_seq, place_id, place_name, place_addr, place_note, place_cost, place_routeyn, place_routeinfo from ctour_wptplace where ctour_seq = %s")
-		queryreply = ("select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, regr_dt, updt_dt from ctour_reply where ctour_seq = %s")
+		queryreply = ("select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timestampdiff(MINUTE, updt_dt, now()) from ctour_reply where ctour_seq = %s")
 
 
 		
@@ -147,7 +147,7 @@ def signUp():
 		ctour_days = tourdata["ctour_days"]
 		open_yn = tourdata["open_yn"]
 		ctour_desc = tourdata["ctour_desc"]
-		ctour_end_place = tourdata["address_end"]
+		ctour_date_start = tourdata["date_start"]
 		ctour_start_place = tourdata["address_start"]
 		waypoints = tourdata["waypoints"]
 		places = tourdata["places"]
@@ -172,7 +172,7 @@ def signUp():
 			#with closing(mysql.connect()) as conn:
 				#with closing(conn.cursor()) as cursor:
 			cursor = conn.cursor()
-			result = cursor.callproc('sp_isTour', (itour_seq, ctour_title, ctour_days, ctour_start_place, ctour_end_place, user_id, open_yn, ctour_desc, new_seq))
+			result = cursor.callproc('sp_isTour', (itour_seq, ctour_title, ctour_days, ctour_start_place, ctour_date_start, user_id, open_yn, ctour_desc, new_seq))
 			print "result"
 			print result
 	
@@ -245,7 +245,7 @@ def savereply():
 		user_id = session.get("id")
 
 
-                queryreply = "select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, regr_dt, updt_dt from ctour_reply where ctour_seq = %s";
+                queryreply = "select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timestampdiff (MINUTE, updt_dt, now()) from ctour_reply where ctour_seq = %s";
 
                 newseq = -1;
 		cursor = conn.cursor()

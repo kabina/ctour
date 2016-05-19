@@ -39,7 +39,11 @@
 		width: 50px;
 		text-align: right;
 	}
-	.reply { width:300; border:1px solid c3c3c3; padding:10px; background-color:#dddddd; word-break:break-all;}
+	.reply { width:300px; border:1px solid #cccccc; padding:10px; background-color:#dddddd; margin: 0px auto; overflow:auto}
+	.replytop { padding:10px; word-break:normal; white-space:normal}
+	.replytailleft  { background-color:#dddddd;float: left;width:170px;padding:10px; }
+	.replytailmid   { background-color:#ccdddd;float: right;width: 30px;padding:10px;}
+	.replytailright { background-color:#dddddd;float:right;width: 30px;padding:10px; }
 
 	</style>
 	<script>
@@ -74,12 +78,12 @@
 		replymin = 35;
 		if(areasize>=100)  {
 			$("#replybody").hide();
-			$("#reply").hide();
+			$("#replyregr").hide();
 			$("#replyarea").width(replymin);
 			$("#mainarea").width(mainsize+(replymax-replymin));
 		}else{
 			$("#replybody").show();
-			$("#reply").show();
+			$("#replyregr").show();
 			$("#replyarea").width(replymax);
 			$("#mainarea").width(mainsize-(replymax-replymin));
 		}
@@ -257,15 +261,9 @@
 		});
 
   		autocomplete2 = new google.maps.places.Autocomplete(
-      		/** @type {!HTMLInputElement} */(document.getElementById('address_end')),
+      		/** @type {!HTMLInputElement} */(document.getElementById('date_start')),
       	{types: ['geocode']});
 		
-  		// When the user selects an address from the dropdown, populate the address
-  		// fields in the form.
-  		//autocomplete2.addListener('place_changed');
-  		autocomplete2.addListener(autocomplete2, 'place_changed', function() {
-			fillInAddress();
-		});
 	}
 		
 		// [START region_fillform]
@@ -349,13 +347,13 @@
 						ctour_title:document.getElementById("ctour_title").value,
 						ctour_days:document.getElementById("ctour_days").value,
 						address_start:document.getElementById("address_start").value,
-						address_end:document.getElementById("address_end").value,
+						date_start:document.getElementById("date_start").value,
 						waypoints:wptarr}
 		sessionStorage.setItem("ctour_seq", document.getElementById("ctour_seq").value);
 		sessionStorage.setItem("ctour_title", document.getElementById("ctour_title").value);
 		sessionStorage.setItem("ctour_days", document.getElementById("ctour_days").value);
 		sessionStorage.setItem("address_start", document.getElementById("address_start").value);
-		sessionStorage.setItem("address_end", document.getElementById("address_end").value);
+		sessionStorage.setItem("date_start", document.getElementById("date_start").value);
 		//console.log(sessionStorage.getItem("ctour_title"));
 	}
 	function initwaypoints() {
@@ -369,23 +367,19 @@
 		document.getElementById("ctour_title").value='';
 		document.getElementById("ctour_days").value='';
 		document.getElementById("address_start").value='';
-		document.getElementById("address_end").value='';
+		document.getElementById("date_start").value='';
 	}
-	function _changenights(idx) {
+	function _changenights() {
 		select = ".accordionsub";
-		//nights = $(select).eq(cmenu).find(".wp_nights").val();
 		nights = document.getElementsByName("wp_nights");
-		// nights = document.getElementById("wp_nights"+idx).value;
-		console.log("nights:"+nights[idx].value+" index:"+idx);
-		//$("h3")[idx].attr("id",nights);
-		//$("h3")[idx].id = nights;
-		$("h3")[idx].textContent = nights[idx].value+"일 "+$("h3")[idx].title;
+		len = nights.length;
 
-		//document.getElementById("ctour_days").value = document.getElementById("ctour_days").value 
-		//alert(title);
-		//$("h3")[idx].attr("textContent",nights+"일 "+title);
-		//document.getElementById("
-
+		for(idx = 0; idx< len; idx ++ ) {
+			h3nights = $("h3")[idx].textContent = nights[idx].value;
+			console.log($("h3")[idx].title);
+			if(h3nights[idx] != nights[idx].value) 
+				$("h3")[idx].textContent = nights[idx].value+"일 "+$("h3")[idx].title;
+		}
 
 		total_nights = 0;
 		for(idx = 0; idx < wptcnt; idx++) {
@@ -405,7 +399,7 @@
 		document.getElementById("ctour_title").value = ctour_master[1];
 		document.getElementById("ctour_days").value = ctour_master[2];
 		document.getElementById("address_start").value = ctour_master[3];
-		document.getElementById("address_end").value = ctour_master[4];
+		document.getElementById("date_start").value = ctour_master[4];
 		document.getElementById("open_yn").selectedIndex = parseInt(ctour_master[5]);
 		document.getElementById("ctour_desc").value = ctour_master[6];
 
@@ -423,7 +417,7 @@
 			cost = ctour_wpt[idx][6];
 			distance = ctour_wpt[idx][7];
 			totalnights += nights;
-			var toAdd = "<div class='group' ><h3 title='"+waypts+"' id="+nights+" data-addr=\""+addr+"\"> "+nights+"일 "+waypts+"</h3><div style='width:200px;' class='accordionsub' ><table ><tr><td>체류:<input type=text name=wp_nights class=wp_nights value="+nights+" size=2 onchange=\"javascript:_changenights("+(idx)+")\"> 박 </td><td>"+
+			var toAdd = "<div class='group' ><h3 title='"+waypts+"' id="+nights+" data-addr=\""+addr+"\"> "+nights+"일 "+waypts+"</h3><div style='width:200px;' class='accordionsub' ><table ><tr><td>체류:<input type=text name=wp_nights class=wp_nights value="+nights+" size=2 onchange=\"javascript:_changenights()\"> 박 </td><td>"+
 " 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
 " <input type=button id="+idx+" class=stroll name=innerroute value='동선' onclick='javascript:stroll(this)'></td></tr><tr><td colspan=2>거리:<input type=text class=wp_distance name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type=text  id=wp_note name=wp_note value='"+note+"' size=20 ></td></tr><tr><td colspan=2>비용:<input type=text id=wp_cost name=wp_cost size=10 value=''/></td></tr></table></div></div>";  
 			$("#accordion").append(toAdd);
@@ -483,7 +477,19 @@
 		replylength = ctour_reply.length;
 		
 		for(idx = 0 ; idx < replylength; idx++) {
-			$("#replybody").append("<div class=reply >"+ctour_reply[idx][3]+" -- "+ctour_reply[idx][5]+"-"+ctour_reply[idx][4]+" <a href='javascript:rreply("+ctour_reply[idx][0]+", "+ctour_reply[idx][1]+")'>Re</a></div>");
+			interv = parseInt(ctour_reply[idx][5]/60);
+			console.log(interv);
+			if(interv == 0)
+				timemsg = "1시간 이내"
+			else 
+				timemsg = (interv)+"시간 전"
+
+			if(interv > 24) {
+				interv = parseInt(interv / 24);
+				timemsg = interv+"일 전";
+			}
+
+			$("#replybody").append("<div class=reply ><div class=replytop>"+ctour_reply[idx][3]+"</div><div class=replytailleft>"+ctour_reply[idx][4]+"</div><div class=replytailmid>"+timemsg+"</div><div class=replytailright><a href='javascript:rreply("+ctour_reply[idx][0]+", "+ctour_reply[idx][1]+")'>답글</a></div></div>");
 		}
 		
 		
@@ -621,7 +627,7 @@
 						ctour_days:document.getElementById("ctour_days").value,
 						ctour_desc:document.getElementById("ctour_desc").value,
 						address_start:document.getElementById("address_start").value,
-						address_end:document.getElementById("address_end").value,
+						date_start:document.getElementById("date_start").value,
 						waypoints:dataarr, places:datawptarr}
 		return master;
 	}
@@ -747,23 +753,39 @@
 			}
 		});
 
-/*
-		wptarr.forEach(function(wpt) {
-			console.log(wpt.wptnm);
-			if(wpt.wptnm == title) {
-				if(confirm("이미 존재하는 경유지입니다. 추가하시겠습니까?"))
-				isExist = true;
-				else
-				isExist = false;
-				
-			}
-		});
-*/
 		if(!isExist) {
-			document.getElementById("wptid").value = title;
-			$("#wptbtn").click();
+			//document.getElementById("wptid").value = title;
+			_addwaypoint(title);
 			_saveSession();
 		}
+	}
+
+	function _addwaypoint(title) {
+		wptcnt++;
+		console.log("wptcnt:"+wptcnt);
+		var toAdd = "<div class=\"group\"><h3 title='"+title+"' id='0' data-addr='"+title+"''>0일 "+title+"</h3><div style='height:100px;' class=accordionsub><table><tr><td>체류:<input type=text name=wp_nights class=wp_nights value='0' size=2 onchange=\"javascript:_changenights()\">박</td><td>"+ 
+" 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
+"<input type=button id="+(wptcnt)+" name=innerroute class=stroll value='동선' onclick='javascript:stroll()'></td></tr><tr><td colspan=2>거리:<input type=text name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type id=wp_note name=wp_note value='' size=20></td></tr><tr><td colspan=2><input type=text name=wp_cost id=wp_cost size=10/></td></tr></table></div></div>";
+		$("#accordion").append(toAdd);
+		refresharc();
+		refresharcsub();
+		$("#accordion").sortable().accordion("refresh");
+		
+		$(".group").mousedown(function() {
+			if(event.which == 3) {
+				if(confirm('삭제하시겠습니까?')) {
+					wptcnt--;
+					this.remove();
+				}
+			}
+		});
+		$("h3").click(function() {
+			cmenu = $('h3').index(this);
+			console.log("=======================");
+			console.log(cmenu);
+			console.log("=======================");
+			_preview(this.getAttribute("title"));
+		});
 	}
 	function _addplace(title, pid, place_addr) {
 
@@ -845,6 +867,10 @@
 			});
 			index ++ ;
 		});
+		if(index < 2) {
+			alert("지역내 여행지 2곳 이상이 포함되어 있어야 동선확인이 가능합합니다");
+			return;
+		}
 
 		for(idx=1;idx< (places.length-1);idx++) {
 			waypts.push({
@@ -906,9 +932,9 @@
 			alert("#여행 시작지 정보 없음");
 			document.getElementById("address_start").focus();
 			return;
-		}else if(document.getElementById("address_end").value=='') {
+		}else if(document.getElementById("date_start").value=='') {
 			alert("#여행 종착지 정보 없음");
-			document.getElementById("address_end").focus();
+			document.getElementById("date_start").focus();
 			return;
 		}
   		var selectedMode = document.getElementById("mode").value;
@@ -944,9 +970,9 @@
 		_preview(address_start);
 	}
 	function _setEndPlace() {
-		address_end = document.getElementById('address_end').value;
-		//document.getElementById("endplace").textContent = address_end;
-		_preview(address_end);
+		date_start = document.getElementById('date_start').value;
+		//document.getElementById("endplace").textContent = date_start;
+		_preview(date_start);
 	}
 
 	function _preview(whereto) {
@@ -1103,19 +1129,19 @@
 			$("#detailplacename").remove();
 			$("#detailreviews").remove();
 			$("#thumbnaillist").remove();
-			$("#searchdetail").append("<div id='detailplacename' style='overflow:vscroll;float;left; height:300px' id=\"detailinfo\"><h2><a href=\"javascript:window.open('"+place.url+"')\">"+place.name+":"+place.formatted_address+"</a></h2> </div>");
+			$("#searchdetail").append("<div id='detailplacename' style='float;left; height:300px;width:100%' ><h2><a href=\"javascript:window.open('"+place.url+"')\">"+place.name+":"+place.formatted_address+"</a></h2> </div>");
 			d = new Date();
 
 			if(place.reviews != void[0]) 
 				for (var i = 0; i < place.reviews.length; i++) {
 					d.setTime(place.reviews[i].time*1000);
-					$("#detailplacename").append("<div id='detailreviews' style='float:left;font-size:9pt' id=\"detailinfo\">평점:"+place.reviews[i].rating+", "+d.toDateString()+", "+place.reviews[i].text+"</div>");
+					$("#detailplacename").append("<div id='detailreviews' style='float:left;font-size:9pt;white-space:normal;word-break:normal;' id=\"detailinfo\">평점:"+place.reviews[i].rating+", "+d.toDateString()+", "+place.reviews[i].text+"</div>");
 					
 				}
 
 			if(place.photos != void[0]) {
 				for (var i = 0; i< place.photos.length; i++ )
-					$("#detailthumbnail").append("<div class='draggable detailthumbnaillist' style='font:9pt;float:left'><a href=\"javascript:largeView('"+place.photos[i].getUrl({'maxWidth': 410, 'MaxHeight': 410})+"');\" title=\""+place.name+"\"><img src=\""+place.photos[i].getUrl({'maxWidth': 100, 'MaxHeight': 100})+"\" style='height:100px' title=\""+place.name+"\"></a></div>");
+					$("#detailthumbnail").append("<div class='draggable detailthumbnaillist' style='font:9pt;float:left;'><a href=\"javascript:largeView('"+place.photos[i].getUrl({'maxWidth': 410, 'MaxHeight': 410})+"');\" title=\""+place.name+"\"><img src=\""+place.photos[i].getUrl({'maxWidth': 100, 'MaxHeight': 100})+"\" style='height:100px' title=\""+place.name+"\"></a></div>");
 			}
 			map.panTo(place.geometry.location);
 			//createMarker(place);
@@ -1209,19 +1235,12 @@
 		{% endfor %}
 		</select>
 		</div>
-		<div>여행제목
-		<input type=text" name="ctour_title" id="ctour_title" class="form-control" placeholder="여행제목" required autofocus value="" size=15>
-		<button id='init' onclick="javascript:initwaypoints();initcTourInfo();_saveSession()">신규</button>
-		</div>
-		<div>공개여부
-		<select name="open_yn" id="open_yn">
-		<option value="Y">공개</option>
-		<option value="N">비공개</option>
-		</select>
-		</div>
       </div>
 	</td>
 	<td>
+		<div style="display:inline">여행제목
+		<input type=text" name="ctour_title" id="ctour_title" class="form-control" placeholder="여행제목" required autofocus value="" size=15>
+		<button id='init' onclick="javascript:initwaypoints();initcTourInfo();_saveSession()">신규</button>
 		<button id="nearBySearch" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:nearbysearch()">근처겁색</button>
 		<select name="nearbytype" id="nearbytype">
 		<option value="lodging">lodging </option>
@@ -1246,37 +1265,37 @@
 		<option value="subway_station">subway_station</option>
 		<option value="train_station">train_station</option>
 		</select>
-		<div style="display:inline">
-        어디부터 <input type="name" name="address_start" id="address_start" class="form-control" value="" onFocus="javascript:geolocate(autocomplete)" placeholder="Where from ?" required autofocus >
+        여행장소 <input type="name" name="address_start" id="address_start" class="form-control" value="" onFocus="javascript:geolocate(autocomplete)" placeholder="Where from ?" required autofocus >
 		<button id="preview" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:_setStartPlace()">위치확인</button>
 		</div>
 		<div style="display:inline">
-        어디까지 <input type="name" name="address_end" id="address_end" class="form-control" placeholder="Where to ?" value="" required autofocus onFocus="javascript:geolocate(autocomplete2)">
-      </div>
-		<div style="display:inline">
-		<button id="preview" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:_setEndPlace()">위치확인</button>
+        여행시작일 <input type="name" name="date_start" id="date_start" class="form-control" placeholder="YYYYMMDD" value="" size=8 required autofocus >
       </div>
 	</td>
 </tr>
 	<tr>
 	<td rowspan=2 valign=top>
+	<div><span style="font-size:15px">공개여부</span></h2>
+		<select name="open_yn" id="open_yn">
+		<option value="Y">공개</option>
+		<option value="N">비공개</option>
+		</select>
+	</div>
 	<div>
 	<h2>소개</h2>
 	 <textarea id="ctour_desc" name="ctour_desc" placeholder="소개내용" rows=3 cols=30></textarea>
 	</div>
 	<div>
 	<h2>여행지</h2>
-	<input type=text id="wptid" name="wptnm" placeholder="여행지">
-	<button id='wptbtn'>추가</button>
 	<div>
-	<strong>Travel Type </strong>
+	<span style="font-size:15px;color:blue">전체동선</span></h2>
 	<select id="mode" onchange="calcRoute();">
   	<option value="DRIVING">자동차</option>
   	<option value="WALKING">도보</option>
   	<option value="BICYCLING">자전거</option>
   	<option value="TRANSIT">환승</option>
 	</select>
-		<button id="seaerchRoute" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:calcRoute()">길찾기</button>
+		<button id="seaerchRoute" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:calcRoute()">동선확인</button>
         <input type="hidden" name="address" id="address" class="form-control" >
         <input type="hidden" name="ctour_seq" id="ctour_seq" class="form-control" value="-1">
 	</div> 
@@ -1289,7 +1308,7 @@
 	총 체류일 <input type=text id="ctour_days" name="ctour_days" value='0' size=3 class="form-control" > 일
 	<br>
 	
-	<button id="btnsavemaster" class="btn btn-lg btn-primary btn-block" type="button">Submit</button>
+	<button id="btnsavemaster" class="btn btn-lg btn-primary btn-block" type="button">저장</button>
 	<input type=button name='save db' value='save db' onclick="javascript:_getTourInfo();">
 	<input type=button name='save session' value='save session' onclick="javascript:_saveSession();">
 	</div>
@@ -1334,9 +1353,9 @@
 </div>
 	<div id=replyarea >
 		<div><img src="/static/image/menu.png" onclick="javascript:_togglereply()"/><div>
-		<div id=replybody>
+		<div id=replybody >
 		</div>
-		<div style="valign:top" id=replyregr >Re<textarea id=replytext rows=3 cols=30></textarea> <input type=button onclick="javascript:_reply()" value="등록"/></div>
+		<div style="valign:top;float:left" id=replyregr ><h2 valign=center>댓글</h2><textarea id=replytext rows=3 cols=40></textarea> <input type=button onclick="javascript:_reply()" value="등록"/></div>
 	</div>
 </div>
 
