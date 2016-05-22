@@ -45,10 +45,14 @@ def gettourinfo():
 		ctour_seq = request.json['ctour_seq']
 		print "______"+ctour_seq
 
-		query = ("select ctour_seq, ctour_title, ctour_days, ctour_start_place, ctour_date_start, open_yn, ctour_desc from ctour_master where ctour_seq = %s")
+		query = ("select a.ctour_seq, a.ctour_title, a.ctour_days, a.ctour_start_place, a.ctour_date_start, a.open_yn, a.ctour_desc, a.ctour_like, a.user_id, b.reply_cnt from ctour_master a, ( select ctour_seq, count(*) reply_cnt from ctour_reply where  ctour_seq = %s ) b where a.ctour_seq = b.ctour_seq")
 		querywpt = ("select ctour_seq, wpt_seq, wpt_name, nights, addr, note, cost, distance from ctour_wpt where ctour_seq = %s")
 		queryplace = ("select ctour_seq, wpt_seq, place_seq, place_id, place_name, place_addr, place_note, place_cost, place_routeyn, place_routeinfo from ctour_wptplace where ctour_seq = %s")
-		queryreply = ("select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timestampdiff(MINUTE, updt_dt, now()) from ctour_reply where ctour_seq = %s")
+		#queryreply = ("select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timestampdiff(MINUTE, updt_dt, now()) from ctour_reply where ctour_seq = %s")
+
+                queryreply = "select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timest, rownum from ( select @rownum:=@rownum+1 rownum, ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timestampdiff (MINUTE, updt_dt, now()) timest, updt_dt "
+                queryreply += "from ( select * from ctour_reply where ctour_seq= %s order by updt_dt desc ) ctour_reply, (select @rownum :=0) TMP  "
+                queryreply += "where @rownum < 7) a where rownum > 0";
 
 
 		
@@ -153,7 +157,7 @@ def signUp():
 		places = tourdata["places"]
 		user_id = session.get("id")
 		print "======================================"
-		print ctour_desc
+		#print ctour_desc #주석 풀면 에러(ascii 어쩌구 에러
 		print "======================================"
 		print len(ctour_seq)
 
@@ -190,13 +194,14 @@ def signUp():
 				distance = wpt["distance"]
                                 print "========================"
                                 print wpt_index
-                                print wpt["wptnm"]
+                                #print wpt_name
+                                #print wpt["wptnm"]
                                 print nights
-                                print addr
-				print note
+                                #print addr
+				#print note
 				print cost
 				print distance
-				wpt_index = wpt["index"]
+				#wpt_index = wpt["index"]
 				cursor.callproc('sp_isTourWpt', (new_seq, wpt_index, wpt_name, nights, addr, note, cost, distance))
                                 print "========================"
 			for place in places :
@@ -209,7 +214,7 @@ def signUp():
 				place_cost = place["place_cost"]
 				place_routeyn = place["place_routeyn"]
 				place_routeinfo = place["place_routeinfo"]
-				print index, place_name, place_id
+				#print index, place_name, place_id
 				cursor.callproc('sp_isTourWptPlace', (new_seq, index, place_seq, place_id, place_name, place_addr, place_note, place_cost, place_routeyn, place_routeinfo))
 				
 	
@@ -230,6 +235,38 @@ def signUp():
 		if conn:
 			conn.close()
 
+@app.route('/addlike',methods=['POST', 'GET'])
+def addlike():
+	try:
+		conn = mdb.connect(user='kabina', password='ah64jj3!', host='192.168.0.144', database='CTOUR')
+ 
+		# read the posted values from the UI
+		data = {}
+		ctour_seq = request.json['ctour_seq']
+		user_id = session.get("id")
+
+
+                querylike = "select ctour_like from ctour_master where ctour_seq = %s";
+
+		cursor = conn.cursor()
+		result = cursor.callproc('sp_isLike', (ctour_seq, user_id))
+
+		cursor.execute(querylike, [str(ctour_seq)])
+		ctour_like = cursor.fetchall()
+
+		data.update({'ctour_like':ctour_like})
+	
+		conn.commit()
+		return json.dumps({'message':'tour like fetched successfully !', 'ctour_like':ctour_like})
+
+	except Exception as e:
+		if conn:
+			conn.rollback()
+			return json.dumps({'error':str(e)})
+	finally:
+		if conn:
+			conn.close()
+
 @app.route('/savereply',methods=['POST', 'GET'])
 def savereply():
 	try:
@@ -245,13 +282,51 @@ def savereply():
 		user_id = session.get("id")
 
 
-                queryreply = "select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timestampdiff (MINUTE, updt_dt, now()) from ctour_reply where ctour_seq = %s";
+                queryreply = "select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timest from ( select @rownum:=@rownum+1 rownum, ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timestampdiff (MINUTE, updt_dt, now()) timest, updt_dt "
+                queryreply += "from ( select * from ctour_reply where ctour_seq= %s order by updt_dt desc ) ctour_reply, (select @rownum :=0) TMP  "
+                queryreply += "where @rownum < 7) a where rownum > 0";
 
                 newseq = -1;
 		cursor = conn.cursor()
 		result = cursor.callproc('sp_isReply', (ctour_seq, reply_seq, rreply_seq, reply_text, user_id, newseq))
 
 		cursor.execute(queryreply, [str(ctour_seq)])
+		ctour_reply = cursor.fetchall()
+
+		data.update({'ctour_reply':ctour_reply})
+	
+		conn.commit()
+		return json.dumps({'message':'tour reply fetched successfully !', 'ctour_reply':ctour_reply})
+
+	except Exception as e:
+		if conn:
+			conn.rollback()
+			return json.dumps({'error':str(e)})
+	finally:
+		if conn:
+			conn.close()
+
+@app.route('/getreply',methods=['POST', 'GET'])
+def getreply():
+	try:
+		conn = mdb.connect(user='kabina', password='ah64jj3!', host='192.168.0.144', database='CTOUR')
+ 
+		# read the posted values from the UI
+		data = {}
+		ctour_reply = request.json['reply'][0]
+		ctour_seq = ctour_reply["ctour_seq"]
+		page = ctour_reply["page"]
+		amount = ctour_reply["get_amt"]
+
+
+                queryreply = "select ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timest from ( select @rownum:=@rownum+1 rownum, ctour_seq, reply_seq, rreply_seq, reply_text, user_id, timestampdiff (MINUTE, updt_dt, now()) timest, updt_dt "
+                queryreply += "from ( select * from ctour_reply where ctour_seq= %s order by updt_dt desc ) ctour_reply, (select @rownum :=0) TMP  "
+                queryreply += "where @rownum < %s*%s) a where rownum > (%s-1)*%s";
+
+                newseq = -1;
+		cursor = conn.cursor()
+
+		cursor.execute(queryreply, ([str(ctour_seq)], str(page), str(amount), str(page), str(amount)))
 		ctour_reply = cursor.fetchall()
 
 		data.update({'ctour_reply':ctour_reply})

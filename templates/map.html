@@ -61,6 +61,7 @@
 	var objplace;
 	var map;
 	var routesteps = [];
+	var reply_amt = 7;
 
 	var placeSearch, autocomplete, autocomplete2;
 	var componentForm = {
@@ -393,6 +394,7 @@
 		else obj.value='1'
 	}
 		//$(select).eq(cmenu).find(".groupsub > h4").each(function() {
+
 	function _loadTourDetail(ctour_master, ctour_wpt, ctour_place, ctour_reply) {
 
 		document.getElementById("ctour_seq").value =  ctour_master[0];
@@ -402,6 +404,9 @@
 		document.getElementById("date_start").value = ctour_master[4];
 		document.getElementById("open_yn").selectedIndex = parseInt(ctour_master[5]);
 		document.getElementById("ctour_desc").value = ctour_master[6];
+		document.getElementById("ctour_reply_cnt").value = ctour_master[9];
+
+		_setlike(ctour_master[0], ctour_master[7]);
 
 		wptcnt = ctour_wpt.length;
 		if(wptcnt>0) {
@@ -469,12 +474,13 @@
 		_printreply(ctour_reply);
 	}
 
-	function _printreply(ctour_reply) {
+	function _printreply( ctour_reply) {
 
 		$(".reply").remove();
 
 		idx = 0;
 		replylength = ctour_reply.length;
+		$("#replybody").append("<div style='align:center' class=reply><span style='font-size:15px;'>"+document.getElementById("ctour_title").value+"</span></div>");
 		
 		for(idx = 0 ; idx < replylength; idx++) {
 			interv = parseInt(ctour_reply[idx][5]/60);
@@ -489,10 +495,65 @@
 				timemsg = interv+"일 전";
 			}
 
-			$("#replybody").append("<div class=reply ><div class=replytop>"+ctour_reply[idx][3]+"</div><div class=replytailleft>"+ctour_reply[idx][4]+"</div><div class=replytailmid>"+timemsg+"</div><div class=replytailright><a href='javascript:rreply("+ctour_reply[idx][0]+", "+ctour_reply[idx][1]+")'>답글</a></div></div>");
+			$("#replybody").append("<div class=reply ><div class=replytop>"+ctour_reply[idx][6]+". "+ctour_reply[idx][3]+"</div><div class=replytailleft>"+ctour_reply[idx][4]+"</div><div class=replytailmid>"+timemsg+"</div><div class=replytailright><a href='javascript:rreply("+ctour_reply[idx][0]+", "+ctour_reply[idx][1]+")'>답글</a></div></div>");
 		}
+		console.log(idx);
+		$("#replybody").append("<div class=replymore style='text-align:center'><span style='font-size:15px'><a href='javascript:_morereply("+ctour_reply[reply_amt-1][0]+","+ctour_reply[reply_amt-1][6]+")'>더보기</a></span></div>");
 		
 		
+	}
+	function _setlike(ctour_seq, ctour_like) {
+		$("#ctour_like_body").remove();
+		$("#ctour_like").append("<div style='flaot:left;width:80px;text-align:right' id=ctour_like_body><span style='font-size:15px'><a href='javascript:_addlike("+ctour_seq+")'>좋아요</a> "+ctour_like+" </span></div>");
+
+	}
+
+	function _addlike(ctour_seq){
+		$.ajax({
+			url: '/addlike',
+			data:JSON.stringify({ctour_seq:ctour_seq}),
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			type: 'POST',
+			success: function(response){
+				console.log(response);
+				ctour_like = response["ctour_like"];
+				if(ctour_like) {
+					_setlike(ctour_seq, ctour_like)
+				}else{
+					alert("오류가발생했습니다. "+ response["error"]);
+				}
+				//procMapControl(response);
+			},
+			error: function(error){
+				console.log(error);
+			}
+		});
+	}
+
+	function _morereply(ctour_seq, start_reply){
+		$.ajax({
+			url: '/getreply',
+			data:JSON.stringify({ctour_seq:ctour_seq},{start_reply:start_reply},{reply_amt:reply_amt}),
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			type: 'POST',
+			success: function(response){
+				console.log(response);
+				ctour_reply = response["ctour_reply"];
+				if(ctour_reply) {
+					document.getElementById("replytext").value = "";
+					alert("저장되었습니다.");
+					_addreply(ctour_reply)
+				}else{
+					alert("오류가발생했습니다. "+ response["error"]);
+				}
+				//procMapControl(response);
+			},
+			error: function(error){
+				console.log(error);
+			}
+		});
 	}
 
 	function _reply(){
@@ -629,6 +690,7 @@
 						address_start:document.getElementById("address_start").value,
 						date_start:document.getElementById("date_start").value,
 						waypoints:dataarr, places:datawptarr}
+		console.log(master);
 		return master;
 	}
 
@@ -1268,20 +1330,21 @@
         여행장소 <input type="name" name="address_start" id="address_start" class="form-control" value="" onFocus="javascript:geolocate(autocomplete)" placeholder="Where from ?" required autofocus >
 		<button id="preview" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:_setStartPlace()">위치확인</button>
 		</div>
-		<div style="display:inline">
+		<div>
         여행시작일 <input type="name" name="date_start" id="date_start" class="form-control" placeholder="YYYYMMDD" value="" size=8 required autofocus >
       </div>
 	</td>
 </tr>
 	<tr>
 	<td rowspan=2 valign=top>
-	<div><span style="font-size:15px">공개여부</span></h2>
+	<div style="float:left"> <span style="font-size:15px;">공개여부</span>
 		<select name="open_yn" id="open_yn">
 		<option value="Y">공개</option>
 		<option value="N">비공개</option>
 		</select>
 	</div>
-	<div>
+	<div id=ctour_like style="float:left"></div>
+	<div style="clear:left">
 	<h2>소개</h2>
 	 <textarea id="ctour_desc" name="ctour_desc" placeholder="소개내용" rows=3 cols=30></textarea>
 	</div>
@@ -1349,6 +1412,7 @@
 	</tr>
 	</tbody>
 	</table>
+	<input type=hidden name="ctour_reply_cnt" id = "ctour_reply_cnt">
     </form>
 </div>
 	<div id=replyarea >
