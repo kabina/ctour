@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-    <title>Google Map Test</title>
+    <title>레오의 여행 플래너</title>
     <link href="../static/css/nheo.css" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="../static/css/style.css" />
 
@@ -10,7 +10,7 @@
     <script type="text/javascript" src="../static/js/nheo.js"></script>
     
 	<script
-	src="http://maps.googleapis.com/maps/api/js?libraries=places">
+	src="http://maps.googleapis.com/maps/api/js?key=AIzaSyA6Ru1bMnTyQ1hesbxnucSjmP4Im30RE-8&libraries=places">
 	</script>
 	<link rel="stylesheet" href="../static/css/jquery-ui.css">
 	<!-- <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> -->
@@ -28,22 +28,24 @@
 
 	.container
 	{
-    	width: 1550;
     	overflow-x: scroll;
+    	white-space:nowrap;
+    	display:inline-block;
 	}
-	#replyarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 300px;}
 	#menuarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 50px;}
 	#mainarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 1200px;}
-	label {
+	#replyarea { float: left; vertical-align: top;height: 100%; display: inline-block; white-space: nowrap; width: 300px;}
+	.menulabel {
 		display: inline-block;
 		width: 50px;
 		text-align: right;
 	}
-	.reply { width:300px; border:1px solid #cccccc; padding:10px; background-color:#dddddd; margin: 0px auto; overflow:auto}
+	.reply { float: left; width:300px; border:1px solid #cccccc; padding:10px; background-color:#dddddd; margin: 0px auto; overflow:auto}
 	.replytop { padding:10px; word-break:normal; white-space:normal}
 	.replytailleft  { background-color:#dddddd;float: left;width:170px;padding:10px; }
 	.replytailmid   { background-color:#ccdddd;float: right;width: 30px;padding:10px;}
 	.replytailright { background-color:#dddddd;float:right;width: 30px;padding:10px; }
+	h4 {width:100;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 
 	</style>
 	<script>
@@ -62,6 +64,7 @@
 	var map;
 	var routesteps = [];
 	var reply_amt = 7;
+	var exchangerate;
 
 	var placeSearch, autocomplete, autocomplete2;
 	var componentForm = {
@@ -75,6 +78,7 @@
 	function _togglereply() {
 		areasize = document.getElementById("replyarea").offsetWidth;
 		mainsize = $("#mainarea").width();
+		//mainsize = 1400;
 		replymax = 300;
 		replymin = 35;
 		if(areasize>=100)  {
@@ -88,11 +92,14 @@
 			$("#replyarea").width(replymax);
 			$("#mainarea").width(mainsize-(replymax-replymin));
 		}
+		console.log("mainsize:"+mainsize);
+		console.log("areasize:"+areasize);
 	}
 
 	function _togglemenu() {
 		areasize = document.getElementById("menuarea").offsetWidth;
 		mainsize = $("#mainarea").width();
+		console.log("mainsize:"+mainsize);
 		menumax = 200;
 		menumin = 35;
 		if(areasize>=100)  {
@@ -131,7 +138,10 @@
     		$( "#accordion" )
       		.accordion({
         		header: "> div > h3",
-				collapsible: true
+			collapsible: true,
+			activate: function(event, ui) {
+				cmenu = $("#accordion").accordion("option", "active")
+			}
       		})
       		.sortable({
         		handle: "h3",
@@ -198,7 +208,28 @@
       			cmenu = $('.group').index(this);
 				});
 		});
+		$(".currency").focusout(function() {
+			this.value = commaSeparateNumber($(this).val());
+		});
+		$(".currency").focusin(function() {
+			this.value = Number($(this).val().replace(/[^0-9\.]+/g,""));
+			this.select();
+		});
+		$(".wp_cost").focusout(function() {
+			this.value = commaSeparateNumber($(this).val());
+		});
+		$(".wp_cost").focusin(function() {
+			this.value = Number($(this).val().replace(/[^0-9\.]+/g,""));
+			this.select();
+		});
 	}
+
+	function commaSeparateNumber(val){
+    		while (/(\d+)(\d{3})/.test(val.toString())){
+      			val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+    		}
+    		return val;
+  	}
 
 	function refreshh4() {
 			$("h4").unbind("click").bind("click",function() {
@@ -405,7 +436,13 @@
 		document.getElementById("open_yn").selectedIndex = parseInt(ctour_master[5]);
 		document.getElementById("ctour_desc").value = ctour_master[6];
 		document.getElementById("ctour_reply_cnt").value = ctour_master[9];
+		document.getElementById("total_cost").value = ctour_master[10];
+		document.getElementById("base_money").selectedIndex = 0;
+		document.getElementById("exchangeask").textContent = "0.0";
+		document.getElementById("exchangebid").textContent = "0.0";
+		document.getElementById("exchangerate").textContent = "0.0";
 
+		console.log("좋아요:"+ctour_master[7]);
 		_setlike(ctour_master[0], ctour_master[7]);
 
 		wptcnt = ctour_wpt.length;
@@ -424,7 +461,7 @@
 			totalnights += nights;
 			var toAdd = "<div class='group' ><h3 title='"+waypts+"' id="+nights+" data-addr=\""+addr+"\"> "+nights+"일 "+waypts+"</h3><div style='width:200px;' class='accordionsub' ><table ><tr><td>체류:<input type=text name=wp_nights class=wp_nights value="+nights+" size=2 onchange=\"javascript:_changenights()\"> 박 </td><td>"+
 " 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
-" <input type=button id="+idx+" class=stroll name=innerroute value='동선' onclick='javascript:stroll(this)'></td></tr><tr><td colspan=2>거리:<input type=text class=wp_distance name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type=text  id=wp_note name=wp_note value='"+note+"' size=20 ></td></tr><tr><td colspan=2>비용:<input type=text id=wp_cost name=wp_cost size=10 value=''/></td></tr></table></div></div>";  
+" <input type=button id="+idx+" class=stroll name=innerroute value='동선' onclick='javascript:stroll(this)'></td></tr><tr><td colspan=2>거리:<input type=text class=wp_distance name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type=text  id=wp_note name=wp_note value='"+note+"' size=20 ></td></tr><tr><td colspan=2>비용:<input type=text class=wp_cost name=wp_cost size=10 value='"+cost+"'/> <label class=base_money>KRW</label></td></tr></table></div></div>";  
 			$("#accordion").append(toAdd);
 		}
 		
@@ -453,8 +490,8 @@
 
 			select = $(".accordionsub:eq("+(parseInt(ictour_wpt)-1)+")");
 
-			select.append("<div class=\"groupsub\"><h4 id='"+ictour_place_id+"' title='' data-addr='"+ictour_place_addr+"'>"+ictour_place_name+"</h4><div><label>주소</label><input type=text size=15 value='"+ictour_place_addr+"' readonly><br><label>메모</label><input type=text class=memo size=15 value='"+ictour_place_note+"'/><br><label>비용</label><input type=text class=cost size=5 value='"+ictour_place_cost+"'/><br><label>동선제외</label><input type=checkbox class=routeyn name=routeyn value='' onclick='javascript:routeyn(this)' "+(parseInt(ictour_place_routeyn)==0?"checked":"")+" /><br>"+
-	"<label>다음장소</label><input type=text size=15 class=routeinfo name=routeinfo readonly value='"+ictour_place_routeinfo+"'/><br>"+
+			select.append("<div class=\"groupsub\"><h4 id='"+ictour_place_id+"' title='' data-addr='"+ictour_place_addr+"'>"+ictour_place_name+"</h4><div><label class=menulabel>주소</label><input type=text size=15 value='"+ictour_place_addr+"' readonly><br><label class=menulabel>메모</label><input type=text class=memo size=15 value='"+ictour_place_note+"'/><br><label class=menulabel>비용</label><input type=text class=currency size=5 value='"+ictour_place_cost+"' onchange='javascript:_changecost()' /> <label class=base_money>KRW</label><br><label class=menulabel>동선제외</label><input type=checkbox class=routeyn name=routeyn value='' onclick='javascript:routeyn(this)' "+(parseInt(ictour_place_routeyn)==0?"checked":"")+" /><br>"+
+	"<label class=menulabel>다음장소</label><input type=text size=15 class=routeinfo name=routeinfo readonly value='"+ictour_place_routeinfo+"'/><br>"+
 	"<center><button name=deleteplace class=deleteplace onclick='javascript:_deleteplace(this)' value='장소삭제'>장소삭제</button></center></div></div>");
 			$(select).find("h4").unbind("click").bind("click",function() {
 				searchByPlaceId(this.id);
@@ -474,10 +511,107 @@
 		_printreply(ctour_reply);
 	}
 
+	function _changecost() {
+		console.log("onchange");
+		totalcost = 0;
+		$(".accordionsub").eq(cmenu).find(".groupsub > div > .currency").each(function() {
+			console.log(cmenu);
+	
+			if(this.value!='') totalcost += Number($(this).val().replace(/[^0-9\.]+/g,""));
+			console.log(totalcost);
+		});
+		console.log("totalcost:"+totalcost);
+		$(".accordionsub").eq(cmenu).find(".wp_cost").each(function() {
+			console.log(this);
+			this.value = totalcost.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+			console.log(this.value);
+		});
+		tour_cost = 0;
+		cost = document.getElementsByName("wp_cost");
+		for(idx = 0 ; idx < cost.length ; idx++ ) {
+			if(cost[idx].value!='') tour_cost += Number(cost[idx].value.replace(/[^0-9\.]+/g,""));
+		}
+		document.getElementById("total_cost").value = tour_cost.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+		
+	}
+	function _changeexchangecost() {
+		rate = parseInt(document.getElementById("exchangerate").textContent);
+		console.log("rate:"+rate);
+		wp_length = $(".accordionsub").length;
+
+		for(idx=0 ; idx< wp_length ; idx++ ) {
+			totalcost = 0;
+			val = 0;
+			$(".accordionsub").eq(idx).find(".groupsub > div > .currency").each(function() {
+				if(this.value!='') {
+					val = Number($(this).val().replace(/[^0-9\.]+/g,""))/rate
+					console.log("val:"+val);
+					totalcost += val;
+					this.value = parseFloat(val).toFixed(2).toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+				}
+			});
+			$(".accordionsub").eq(idx).find(".wp_cost").each(function() {
+				this.value = parseFloat(totalcost).toFixed(2).toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+				console.log("wp_cost:"+this.value);
+			});
+		}
+		tour_cost = 0;
+		cost = document.getElementsByName("wp_cost");
+		for(idx = 0 ; idx < cost.length ; idx++ ) {
+			if(cost[idx].value!='') tour_cost += Number(cost[idx].value.replace(/[^0-9\.]+/g,""));
+		}
+		document.getElementById("total_cost").value = tour_cost.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+
+	}
+	function _addreply( ctour_reply) {
+
+		$(".replymore").remove();
+
+		console.log(ctour_reply);
+		idx = 0;
+		replylength = ctour_reply.length;
+		
+		for(idx = 0 ; idx < replylength; idx++) {
+			interv = parseInt(ctour_reply[idx][5]/60);
+			console.log(interv);
+			if(interv == 0)
+				timemsg = "1시간 이내"
+			else 
+				timemsg = (interv)+"시간 전"
+
+			if(interv > 24) {
+				interv = parseInt(interv / 24);
+				timemsg = interv+"일 전";
+			}
+
+			$("#replybody").append("<div class=reply ><div class=replytop>"+ctour_reply[idx][6]+". "+ctour_reply[idx][3]+"</div><div class=replytailleft>"+ctour_reply[idx][4]+"</div><div class=replytailmid>"+timemsg+"</div><div class=replytailright><a href='javascript:rreply("+ctour_reply[idx][0]+", "+ctour_reply[idx][1]+")'>답글</a></div></div>");
+		}
+		console.log(idx);
+		if(idx == reply_amt)
+		$("#replybody").append("<div class=replymore style='float:left;width:300px;text-align:center'><span style='font-size:15px'><a href='javascript:_morereply("+ctour_reply[reply_amt-1][0]+","+ctour_reply[reply_amt-1][6]+")'>더보기</a></span></div>");
+		
+		
+	}
+
+	function _changebasemoney() {
+		e=document.getElementById("base_money");
+		to_base_money = e.options[e.selectedIndex].value;
+		from_base_money = document.getElementById("moneybase").textContent;
+		document.getElementById("moneybase").textContent = to_base_money;
+
+		$(".base_money").each(function() {
+			this.textContent = to_base_money;
+		});
+		_getexchangerate(to_base_money, "KRW");
+		
+	}
+
 	function _printreply( ctour_reply) {
 
 		$(".reply").remove();
+		$(".replymore").remove();
 
+		console.log(ctour_reply);
 		idx = 0;
 		replylength = ctour_reply.length;
 		$("#replybody").append("<div style='align:center' class=reply><span style='font-size:15px;'>"+document.getElementById("ctour_title").value+"</span></div>");
@@ -497,8 +631,10 @@
 
 			$("#replybody").append("<div class=reply ><div class=replytop>"+ctour_reply[idx][6]+". "+ctour_reply[idx][3]+"</div><div class=replytailleft>"+ctour_reply[idx][4]+"</div><div class=replytailmid>"+timemsg+"</div><div class=replytailright><a href='javascript:rreply("+ctour_reply[idx][0]+", "+ctour_reply[idx][1]+")'>답글</a></div></div>");
 		}
-		console.log(idx);
-		$("#replybody").append("<div class=replymore style='text-align:center'><span style='font-size:15px'><a href='javascript:_morereply("+ctour_reply[reply_amt-1][0]+","+ctour_reply[reply_amt-1][6]+")'>더보기</a></span></div>");
+		if(idx == reply_amt) {
+			console.log("idx:"+idx);
+			$("#replybody").append("<div class=replymore style='float:left;width:300px;text-align:center'><span style='font-size:15px'><a href='javascript:_morereply("+ctour_reply[reply_amt-1][0]+","+ctour_reply[reply_amt-1][6]+")'>더보기</a></span></div>");
+		}
 		
 		
 	}
@@ -531,10 +667,32 @@
 		});
 	}
 
+	function _getexchangerate(from, to){
+		url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20(%22"+from+to+"%22)&format=json&env=store://datatables.org/alltableswithkeys&callback=";
+		$.ajax({
+			url: url,
+			type: 'GET',
+			success: function(response){
+				_setexchangerate(response["query"]["results"]["rate"]);
+			},
+			error: function(error){
+				console.log(error);
+			}
+		});
+	}
+
+	function _setexchangerate(rates) {
+		exchangerate = rates;
+		document.getElementById("exchangeask").textContent = rates["Ask"];
+		document.getElementById("exchangebid").textContent = rates["Bid"];
+		document.getElementById("exchangerate").textContent = rates["Rate"];
+		console.log(exchangerate);
+	}
+
 	function _morereply(ctour_seq, start_reply){
 		$.ajax({
 			url: '/getreply',
-			data:JSON.stringify({ctour_seq:ctour_seq},{start_reply:start_reply},{reply_amt:reply_amt}),
+			data:JSON.stringify({ctour_seq:ctour_seq,start_reply:start_reply,reply_amt:7}),
 			contentType: "application/json; charset=utf-8",
 			dataType: "json",
 			type: 'POST',
@@ -542,8 +700,6 @@
 				console.log(response);
 				ctour_reply = response["ctour_reply"];
 				if(ctour_reply) {
-					document.getElementById("replytext").value = "";
-					alert("저장되었습니다.");
 					_addreply(ctour_reply)
 				}else{
 					alert("오류가발생했습니다. "+ response["error"]);
@@ -641,7 +797,7 @@
 			routeinfo_idx = 0;
 
 			select_memo = $(" > .groupsub > div > .memo", this);
-			select_cost = $(" > .groupsub > div > .cost", this);
+			select_cost = $(" > .groupsub > div > .currency", this);
 			select_routeyn = $(" > .groupsub > div > .routeyn", this);
 			select_routeinfo = $(" > .groupsub > div > .routeinfo", this);
 			
@@ -689,6 +845,7 @@
 						ctour_desc:document.getElementById("ctour_desc").value,
 						address_start:document.getElementById("address_start").value,
 						date_start:document.getElementById("date_start").value,
+						ctour_cost:document.getElementById("total_cost").value,
 						waypoints:dataarr, places:datawptarr}
 		console.log(master);
 		return master;
@@ -825,9 +982,9 @@
 	function _addwaypoint(title) {
 		wptcnt++;
 		console.log("wptcnt:"+wptcnt);
-		var toAdd = "<div class=\"group\"><h3 title='"+title+"' id='0' data-addr='"+title+"''>0일 "+title+"</h3><div style='height:100px;' class=accordionsub><table><tr><td>체류:<input type=text name=wp_nights class=wp_nights value='0' size=2 onchange=\"javascript:_changenights()\">박</td><td>"+ 
+		var toAdd = "<div class=\"group\"><h3 title='"+title+"' id='0' data-addr='"+title+"''>0일 "+title+"</h3><div style='height:100px;' class=accordionsub><table><tr><td>체류:<input type=text name=wp_nights class=wp_nights value='0' size=1 onchange=\"javascript:_changenights()\">박</td><td>"+ 
 " 이동:<select class=\"routemode\" name=routemode onchange=\"stroll();\"> <option value=\"DRIVING\">자동차</option> <option value=\"WALKING\">도보</option> <option value=\"BICYCLING\">자전거</option> <option value=\"TRANSIT\">환승</option> </select>"+
-"<input type=button id="+(wptcnt)+" name=innerroute class=stroll value='동선' onclick='javascript:stroll()'></td></tr><tr><td colspan=2>거리:<input type=text name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type id=wp_note name=wp_note value='' size=20></td></tr><tr><td colspan=2><input type=text name=wp_cost id=wp_cost size=10/></td></tr></table></div></div>";
+"<input type=button id="+(wptcnt)+" name=innerroute class=stroll value='동선' onclick='javascript:stroll()'></td></tr><tr><td colspan=2>거리:<input type=text name=wp_distance value='' size=3/> km</td></tr><tr><td colspan=2>비고:<input type id=wp_note name=wp_note value='' size=20></td></tr><tr><td colspan=2><input type=text name=wp_cost class=wp_cost size=10 value='' onchange='javascript:_changecost()' /></td></tr></table></div></div>";
 		$("#accordion").append(toAdd);
 		refresharc();
 		refresharcsub();
@@ -855,9 +1012,16 @@
 
 		select = $(".accordionsub").eq(cmenu);
 
-		select.append("<div class=\"groupsub\"><h4 id='"+pid+"' title='' data-addr='"+place_addr+"'>"+title+"</h4><div><label>주소</label><input type=text size=15 value='"+place_addr+"' readonly><label>메모</label><input type=text class=memo name=memo size=15 value=''><br><label>비용</label><input type=text class=cost name=cost size=5 value=''/><br><label>동선제외</label><input type=checkbox class=routeyn name=routeyn/><br><label>다음장소</label><input type=text size=15 class=routeinfo name=routeinfo readonly value=''/><br><center><button name=deleteplace class=deleteplace onclick='javascript:_deleteplace(this)' value='장소삭제'>장소삭제</button></      center></div></div>");
+		select.append("<div class=\"groupsub\"><h4 id='"+pid+"' title='' data-addr='"+place_addr+"'>"+title+"</h4><div><label class=menulabel>주소</label><input type=text size=15 value='"+place_addr+"' readonly><label class=menulabel>메모</label><input type=text class=memo name=memo size=15 value=''><br><label class=menulabel>비용</label><input type=text class=currency name=cost size=5 value='' onchange='javascript:_changecost()'/> <label class=base_money>KRW</label><br><label class=menulabel>동선제외</label><input type=checkbox class=routeyn name=routeyn/><br><label class=menulabel>다음장소</label><input type=text size=15 class=routeinfo name=routeinfo readonly value=''/><br><center><button name=deleteplace class=deleteplace onclick='javascript:_deleteplace(this)' value='장소삭제'>장소삭제</button></      center></div></div>");
 		$(select).find("h4").unbind("click").bind("click",function() {
 			searchByPlaceId(this.id);
+		});
+		$(select).find(".currency").focusout(function() {
+			this.value = commaSeparateNumber($(this).val());
+		});
+		$(select).find(".currency").focusin(function() {
+			this.value = Number($(this).val().replace(/[^0-9\.]+/g,""));
+			this.select();
 		});
 		$(select).sortable().accordion("refresh");
 		refresharcsub();
@@ -1185,6 +1349,28 @@
 		obj = service.getDetails(request, callback_searchDetail);
 	}
 
+	function _translate(review) {
+		
+		text = document.getElementById("review"+review).textContent;
+		e = document.getElementById("transtype"+review);
+		source = e.options[e.selectedIndex].value;
+		form_data = {source:source,target:'ko',text:text};
+         	$.ajax({
+             		url: 'https://openapi.naver.com/v1/language/translate',
+             		data: form_data,
+             		contentType: "application/x-www-form-urlencoded",
+			"X-Naver-Client-Id": "15YXthdPTbDcrlGAyqEi",
+			"X-Naver-Client-Secret": "XjQEHIM74F",
+             		type: 'POST',
+             		success: function(response){
+                 		console.log(response);
+             		},
+             		error: function(error){
+                 		console.log(error);
+             		}
+         	});
+		
+	}
 	function callback_searchDetail(place, status) {
 			$("#detailinfo").remove();
 			$(".detailthumbnaillist").remove();
@@ -1194,16 +1380,19 @@
 			$("#searchdetail").append("<div id='detailplacename' style='float;left; height:300px;width:100%' ><h2><a href=\"javascript:window.open('"+place.url+"')\">"+place.name+":"+place.formatted_address+"</a></h2> </div>");
 			d = new Date();
 
+			console.log(place);
 			if(place.reviews != void[0]) 
 				for (var i = 0; i < place.reviews.length; i++) {
 					d.setTime(place.reviews[i].time*1000);
-					$("#detailplacename").append("<div id='detailreviews' style='float:left;font-size:9pt;white-space:normal;word-break:normal;' id=\"detailinfo\">평점:"+place.reviews[i].rating+", "+d.toDateString()+", "+place.reviews[i].text+"</div>");
+					$("#detailplacename").append("<div id='detailreviews' style='float:left;font-size:9pt;white-space:normal;word-break:normal;' id=\"detailinfo\">평점:"+place.reviews[i].rating+", "+d.toDateString()+", <label id=review"+i+" >"+place.reviews[i].text+"</label><select id=transtype"+i+" name=transtype> <option value=en >영</option> <option value=ja >일</option> <option value=zh-CN >중</option> </select><button onclick='javascript:_translate("+i+")'>번역</button></div>");
 					
 				}
 
+
+
 			if(place.photos != void[0]) {
 				for (var i = 0; i< place.photos.length; i++ )
-					$("#detailthumbnail").append("<div class='draggable detailthumbnaillist' style='font:9pt;float:left;'><a href=\"javascript:largeView('"+place.photos[i].getUrl({'maxWidth': 410, 'MaxHeight': 410})+"');\" title=\""+place.name+"\"><img src=\""+place.photos[i].getUrl({'maxWidth': 100, 'MaxHeight': 100})+"\" style='height:100px' title=\""+place.name+"\"></a></div>");
+					$("#detailthumbnail").append("<div class='draggable detailthumbnaillist' style='font:9pt;float:left;height:100px;'><a href=\"javascript:largeView('"+place.photos[i].getUrl({'maxWidth': 410, 'MaxHeight': 410})+"');\" title=\""+place.name+"\"><img src=\""+place.photos[i].getUrl({'maxWidth': 100, 'MaxHeight': 100})+"\" style='height:100px' title=\""+place.name+"\"></a></div>");
 			}
 			map.panTo(place.geometry.location);
 			//createMarker(place);
@@ -1263,46 +1452,40 @@
 </head>
 <body>
 <div class="container">
-<div id=menuarea >
-	<div id=menuicon><img src="/static/image/menu.png" onclick="javascript:_togglemenu()"/></div>
-	<div id=menubody style="display:none">
-	<h2>MENU 1</h2>
-	<h2>MENU 2</h2>
-	<h2>MENU 3</h2>
-	<h2>MENU 4</h2>
+	<div id=menuarea >
+		<div id=menuicon><img src="/static/image/menu.png" onclick="javascript:_togglemenu()"/></div>
+		<div id=menubody style="display:none">
+			<h2>MENU 1</h2>
+			<h2>MENU 2</h2>
+			<h2>MENU 3</h2>
+			<h2>MENU 4</h2>
+		</div>
 	</div>
-</div>
 <div id=mainarea >
-	<table width=100% height=100% border=1>
+	<table height=100% border=1 width=100%>
 	<tbody>
 	<tr>
-	<td colspan=2>
-      <div style="float:left">
-        Google Map Test
-      </div>
-      <div style="float:right">
-        {{ session.get("id") }} {{ session.get("name") }} <img src="{{ session.get("pic") }}" style="height:30px">
-      </div>
-        <form class="form-map" onsubmit='return false;'>
-	</td></tr>
-	<tr>
 	<td style="width:250px">
-      <div>
-		<div>
-        	여행title 
+        <form class="form-map" onsubmit='return false;'>
+	<div>
+        	My Trip 
 		<select name="tourlist" id="tourlist">
 		<option value="0">선택</option>
 		{% for list in ctour_list %}
 		<option value="{{ list[0] }}">{{ list[1] }} </option>
 		{% endfor %}
 		</select>
+		<button id='init' onclick="javascript:initwaypoints();initcTourInfo();_saveSession()">신규</button>
+	</div>
+		<div>
+        여행장소 <input type="name" name="address_start" id="address_start" class="form-control" value="" onFocus="javascript:geolocate(autocomplete)" placeholder="Where from ?" required autofocus >
+		<button id="preview" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:_setStartPlace()">위치확인</button>
 		</div>
-      </div>
 	</td>
 	<td>
-		<div style="display:inline">여행제목
+		<div style="width:500px;float:left">
+		여행제목
 		<input type=text" name="ctour_title" id="ctour_title" class="form-control" placeholder="여행제목" required autofocus value="" size=15>
-		<button id='init' onclick="javascript:initwaypoints();initcTourInfo();_saveSession()">신규</button>
 		<button id="nearBySearch" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:nearbysearch()">근처겁색</button>
 		<select name="nearbytype" id="nearbytype">
 		<option value="lodging">lodging </option>
@@ -1327,11 +1510,26 @@
 		<option value="subway_station">subway_station</option>
 		<option value="train_station">train_station</option>
 		</select>
-        여행장소 <input type="name" name="address_start" id="address_start" class="form-control" value="" onFocus="javascript:geolocate(autocomplete)" placeholder="Where from ?" required autofocus >
-		<button id="preview" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:_setStartPlace()">위치확인</button>
-		</div>
-		<div>
         여행시작일 <input type="name" name="date_start" id="date_start" class="form-control" placeholder="YYYYMMDD" value="" size=8 required autofocus >
+      </div>
+      <div style="float:right;align:top">
+        {{ session.get("id") }} {{ session.get("name") }} <img src="{{ session.get("pic") }}" style="height:30px">
+      </div>
+      <div style="clear:left">
+        화폐기준 <select name="base_money" id="base_money" onchange="_changebasemoney()">
+		 	<option value="KRW">원</option>
+		 	<option value="USD">달러</option>
+		 	<option value="EUR">유로</option>
+		 	<option value="JPY">엔</option>
+		 	<option value="CNY">위안</option>
+		 	<option value="AUD">호주달러</option>
+		 	<option value="CAD">캐나다달러</option>
+		</select>
+		<button id="changeexchangecost" class="btn btn-lg btn-primary btn-block" type="button" onclick="javascript:_changeexchangecost()">화폐기준변경</button>
+		<label id=moneybase name=moneybase >KRW</label>
+	살때:<label id=exchangeask style="width:50px;background-color:yellow">1.0000</label>
+	팔때:<label id=exchangebid style="width:50px;background-color:yellow">1.0000</label>
+	기준:<label id=exchangerate style="width:50px;background-color:yellow">1.0000</label>
       </div>
 	</td>
 </tr>
@@ -1344,12 +1542,13 @@
 		</select>
 	</div>
 	<div id=ctour_like style="float:left"></div>
-	<div style="clear:left">
-	<h2>소개</h2>
-	 <textarea id="ctour_desc" name="ctour_desc" placeholder="소개내용" rows=3 cols=30></textarea>
-	</div>
+		<div style="clear:left">
+		<h2>소개</h2>
+	 	<textarea id="ctour_desc" name="ctour_desc" placeholder="소개내용" rows=3 cols=30></textarea>
+		</div>
 	<div>
 	<h2>여행지</h2>
+	</div>
 	<div>
 	<span style="font-size:15px;color:blue">전체동선</span></h2>
 	<select id="mode" onchange="calcRoute();">
@@ -1368,7 +1567,8 @@
 	<div id="wpt_info">
 	</div>
 	<div>
-	총 체류일 <input type=text id="ctour_days" name="ctour_days" value='0' size=3 class="form-control" > 일
+	총 체류일 <input type=text id="ctour_days" name="ctour_days" value='0' size=2 class="form-control" > 일/
+	총 비용 <input type="text" class=currency pattern = '(0\.((0[1-9]{1})|([1-9]{1}([0-9]{1})?)))|(([1-9]+[0-9]*)(\.([0-9]{1,2}))?)' id="total_cost" name="total_cost" value='0' size=6  > <label class=base_money>KRW</label>
 	<br>
 	
 	<button id="btnsavemaster" class="btn btn-lg btn-primary btn-block" type="button">저장</button>
@@ -1394,20 +1594,20 @@
 			<div id="googleMap" style="width:100%;height:600px;"></div>
 			<div id="directionsPannel" style="width:30%;height:100%;"></div>
 		</div>
-<div id="layer1" class="pop-layer">
-	<div class="pop-container">
-		<div class="pop-conts">
-		<!--content //-->
-		<p id="detailpopup">
-		</p>
- 		
-		<div class="btn-r">
-		<a href="#" class="cbtn">Close</a>
+		<div id="layer1" class="pop-layer">
+		<div class="pop-container">
+			<div class="pop-conts">
+			<!--content //-->
+				<p id="detailpopup">
+				</p>
+ 			
+				<div class="btn-r">
+				<a href="#" class="cbtn">Close</a>
+				</div>
+			<!--// content-->
+			</div>
 		</div>
-		<!--// content-->
 		</div>
-	</div>
-</div>
 	</td>
 	</tr>
 	</tbody>
@@ -1415,58 +1615,16 @@
 	<input type=hidden name="ctour_reply_cnt" id = "ctour_reply_cnt">
     </form>
 </div>
-	<div id=replyarea >
-		<div><img src="/static/image/menu.png" onclick="javascript:_togglereply()"/><div>
-		<div id=replybody >
-		</div>
-		<div style="valign:top;float:left" id=replyregr ><h2 valign=center>댓글</h2><textarea id=replytext rows=3 cols=40></textarea> <input type=button onclick="javascript:_reply()" value="등록"/></div>
+<div id=replyarea >
+	<div><img src="/static/image/menu.png" onclick="javascript:_togglereply()"/><div>
+	<div id=replybody >
 	</div>
+	<div style="valign:top;float:left" id=replyregr ><h2 valign=center>댓글</h2>
+		<textarea id=replytext rows=3 cols=40></textarea> 
+		<input type=button onclick="javascript:_reply()" value="등록"/>
+	</div>
+</div>
 </div>
 
 </body>
 </html>
-
-<!--
-    <div id="accordionsub">
-  		<div class="groupsub">
-    		<h4 sid="1">Strasboug, France</h4>
-			<div>test</div>
-		</div>
-  		<div class="groupsub">
-    		<h4 sid="1">Colmar, France</h4>
-			<div>test</div>
-		</div>
-  		<div class="groupsub">
-    		<h4 sid="1">Section 1.3</h4>
-			<div>test</div>
-		</div>
-    </div>
-  </div>
-  <div class="group" sid="2">
-		<h3 sid="Colmar, France">Colmar, France</h3>
-    <div id="accordionsub">
-  		<div class="groupsub">
-    		<h4 sid="1">Strasboug, France</h4>
-			<div>test</div>
-		</div>
-  		<div class="groupsub">
-    		<h4 sid="1">Colmar, France</h4>
-			<div>test</div>
-		</div>
-  		<div class="groupsub">
-    		<h4 sid="1">Section 1.3</h4>
-			<div>test</div>
-		</div>
-    </div>
-  </div>
-  <div class="group" sid="3">
-	<h3>Basel, Swiss</h3>
-    <div>
-      <p>방문지2
-      <ul>
-        <li>List item one</li>
-        <li>List item two</li>
-        <li>List item three</li>
-      </ul>
-    </div>
--->

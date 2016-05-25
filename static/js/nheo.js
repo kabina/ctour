@@ -83,11 +83,11 @@ $(function(){
 				ctour_master = response["ctour_master"];
 				console.log(response);
 				if(ctour_master) {
-					alert("저장되었습니다.[ctour_seq:"+ctour_master[8]+"]");
-					document.getElementById("ctour_seq").value = ctour_master[8];
+					alert("저장되었습니다.[ctour_seq:"+ctour_master[9]+"]");
+					document.getElementById("ctour_seq").value = ctour_master[9];
 					_saveSession();
 				}else{
-					alert("오류가발생했습니다. "+ response["error"]);
+					alert("오류가발생했습니다. "+ response["html"]);
 				}
 				//procMapControl(response);
 			},
